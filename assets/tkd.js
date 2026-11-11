@@ -22,6 +22,7 @@
     try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(raw&&raw.version===seed.version&&Array.isArray(raw.cases)&&Array.isArray(raw.rkud)){
       raw.audit=Array.isArray(raw.audit)?raw.audit:[];
       raw.cases=raw.cases.filter(x=>x&&typeof x.id==='string'&&['A','B'].includes(x.lane)).map(x=>({...x,notes:Array.isArray(x.notes)?x.notes:[]}));
+      for(const entry of raw.cases){const original=seed.cases.find(x=>x.id===entry.id);if(!entry.impact&&original?.impact)entry.impact=original.impact;}
       const old=raw.cases.find(x=>x.id==='BALI-RKUD-2026-023'&&x.title==='Konfirmasi penerimaan rekap RKUD Kota Denpasar'&&!x.notes.length);
       if(old){const corrected=seed.cases.find(x=>x.id===old.id);Object.assign(old,{title:corrected.title,evidence:corrected.evidence,context:corrected.context});}
       return raw;
@@ -100,10 +101,10 @@
     return {rank:x.severity==='tinggi'?3:4,label:'Target '+showDate(x.deadline),tone:'pending'};
   }
   const ordered=rows=>rows.slice().sort((a,b)=>priority(a).rank-priority(b).rank||(a.deadline||'9999').localeCompare(b.deadline||'9999')||a.id.localeCompare(b.id));
-  const impact=x=>x.lane==='B'?'Analisis APBD berpotensi menggunakan informasi kas yang belum lengkap.':x.dimension==='D3'?'Hambatan kegiatan berpotensi memengaruhi penyelesaian tahapan penyaluran.':'Kelengkapan persyaratan berpotensi menunda proses penyaluran TKD.';
+  const impact=x=>x.impact||(x.lane==='B'?'Analisis APBD berpotensi menggunakan informasi kas yang belum lengkap.':x.dimension==='D3'?'Hambatan kegiatan berpotensi memengaruhi penyelesaian tahapan penyaluran.':'Kelengkapan persyaratan berpotensi menunda proses penyaluran TKD.');
   function workCard(x){
     const p=priority(x),actions=caseActions(x),primary=actions[0];
-    return '<article class="tkd-work-card" data-case-record="'+esc(x.id)+'"><div class="tkd-work-main"><div class="tkd-inline-tags"><span class="tkd-tag">'+(x.lane==='A'?'Penyaluran TKD':'Informasi RKUD')+'</span><span class="tkd-tag tkd-'+p.tone+'">'+esc(p.label)+'</span></div><h3>'+esc(x.title)+'</h3><p class="tkd-facts">'+esc(x.evidence)+'</p><p class="tkd-impact"><b>Potensi dampak:</b> '+esc(impact(x))+'</p><p class="tkd-work-next"><b>Berikutnya:</b> '+esc(nextCaseAction(x))+'</p><p class="tkd-record-id">'+esc(x.id)+' · '+esc(stageLabel(x))+'</p></div><div class="tkd-work-side"><p><b>PIC</b><span>'+esc(x.owner||'Belum ditetapkan')+'</span></p><p><b>Target tindak lanjut</b><span>'+esc(x.deadline?showDate(x.deadline):'Belum ditetapkan')+'</span></p>'+(primary?'<button type="button" class="tkd-button" data-case-action="'+primary+'" data-case-id="'+esc(x.id)+'">'+esc(labelForAction(primary,x))+'</button>':'')+'<button type="button" class="tkd-text-button" data-tkd-case="'+esc(x.id)+'">'+(x.stage==='Selesai'?'Hasil & riwayat':'Rincian & tindakan lain')+'</button></div></article>';
+    return '<article class="tkd-work-card" data-case-record="'+esc(x.id)+'"><div class="tkd-work-main"><div class="tkd-inline-tags"><span class="tkd-tag">'+(x.lane==='A'?'Penyaluran TKD':'Informasi RKUD')+'</span><span class="tkd-tag tkd-'+p.tone+'">'+esc(p.label)+'</span></div><h3>'+esc(x.title)+'</h3><p class="tkd-facts">'+esc(x.evidence)+'</p><p class="tkd-impact"><b>'+(x.stage==='Selesai'?'Hasil:':'Potensi dampak:')+'</b> '+esc(x.stage==='Selesai'?x.result:impact(x))+'</p><p class="tkd-work-next"><b>Berikutnya:</b> '+esc(nextCaseAction(x))+'</p><p class="tkd-record-id">'+esc(x.id)+' · '+esc(stageLabel(x))+'</p></div><div class="tkd-work-side"><p><b>PIC</b><span>'+esc(x.owner||'Belum ditetapkan')+'</span></p><p><b>Target tindak lanjut</b><span>'+esc(x.deadline?showDate(x.deadline):'Belum ditetapkan')+'</span></p>'+(primary?'<button type="button" class="tkd-button" data-case-action="'+primary+'" data-case-id="'+esc(x.id)+'">'+esc(labelForAction(primary,x))+'</button>':'')+'<button type="button" class="tkd-text-button" data-tkd-case="'+esc(x.id)+'">'+(x.stage==='Selesai'?'Hasil & riwayat':'Rincian & tindakan lain')+'</button></div></article>';
   }
   function rkudIssues(x){
     const issues=[];

@@ -287,6 +287,7 @@ window.MYINTRESS_TKD_SEED = (() => {
     "transfer": "RKUD",
     "stage": "Ditugaskan",
     "title": "Tinjauan catatan metodologi rekap RKUD Denpasar",
+    "impact": "Penafsiran rekap yang belum ditelaah dapat menghasilkan kesimpulan fiskal yang keliru.",
     "evidence": "Rekap telah diterima dan digunakan dalam bahan ALCo. Analis menelaah catatan metodologi serta memastikan batasan interpretasi sumber dicantumkan.",
     "assignedAt": "2026-11-10T09:00"
   }
