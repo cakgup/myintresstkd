@@ -19,7 +19,7 @@
         .site-header { padding: .8rem clamp(.65rem, 3vw, 1.1rem); background: white; border-bottom: 1px solid var(--line); }
         .header-row { display: flex; align-items: center; gap: clamp(.35rem, 2vw, .8rem); }
         .brand { flex: 1; min-width: 0; text-decoration: none; color: inherit; }
-        .brand img { display: block; width: min(100%, 9.25rem); }
+        .brand img { display: block; width: min(100%, 9.25rem); height: auto; }
         .brand span { display: block; margin-top: .1rem; color: #64718d; font-size: clamp(.63rem, 2.4vw, .77rem); line-height: 1.2; }
         .header-action, .profile { flex: none; display: grid; place-items: center; width: 2.25rem; aspect-ratio: 1; border-radius: .78rem; }
         .header-action { position: relative; color: #4a5368; }
@@ -91,6 +91,12 @@
         .materials-link:focus-visible { outline: 2px solid #245ba8; outline-offset: 3px; }
         .dashboard-main { padding: 1rem clamp(.65rem, 3vw, 1.1rem); display: grid; gap: 1rem; }
         .ews-alert { display: flex; align-items: center; gap: .55rem; padding: .7rem; border: 1px solid #f4c8c6; border-radius: 1rem; background: linear-gradient(105deg, #fce8e7, #faf0df 55%, #f7f7fa); }
+        .ews-alert[hidden] { display: none; }
+        @media (max-width: 40rem) {
+            .ews-alert { position: relative; flex-wrap: wrap; padding: .85rem; padding-right: 2.5rem; }
+            .ews-alert-actions { width: 100%; padding-left: 2.55rem; justify-items: start; }
+            .ews-alert-dismiss { position: absolute; right: .35rem; top: .55rem; transform: none; }
+        }
         .ews-alert-icon { display: grid; place-items: center; flex: none; width: 2rem; aspect-ratio: 1; border-radius: .75rem; color: white; background: #be3432; }
         .ews-alert-icon svg { width: 1rem; }
         .ews-alert-copy { flex: 1; min-width: 0; }
@@ -286,11 +292,6 @@
     /* ===== MyIntress EWS TKD / APBD demonstration layer (namespaced) ===== */
 .tkd-open-menu { width:100%; text-align:left; font-weight:650; color:#17468b; padding:.22rem .1rem; }
 .tkd-open-menu:hover { color:#3c49af; }
-.tkd-launch-banner { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.75rem; padding:.85rem 1.05rem; border-radius:1rem; border:1px solid #a1c8dc; background:linear-gradient(100deg,#e5f5fb,#f6fafc 72%,#fff); }
-.tkd-launch-banner strong {display:block;color:#103d63;font-size:.92rem}
-.tkd-launch-banner p {font-size:.78rem;color:#426477;margin-top:.15rem;max-width:49rem}
-.tkd-launch-banner button {border:0;border-radius:.7rem;background:#143c6a;color:#fff;padding:.6rem .9rem;font-weight:750;font-size:.8rem}
-.tkd-launch-banner button:hover{background:#1a578c}
 .tkd-page {color:#24364b;background:#f3f6fa;padding:1.25rem clamp(.75rem,2.8vw,2rem) 3rem;min-height:78vh;font-family:Inter,Arial,sans-serif}
 .tkd-shell{max-width:1330px;margin:0 auto;display:grid;gap:1.1rem}
 .tkd-hero {border-radius:1.2rem;overflow:hidden;background:linear-gradient(115deg,#0d2854 0%,#164f7d 58%,#207e91);color:#fff;padding:1.3rem clamp(1rem,3vw,2rem);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;position:relative}
@@ -487,10 +488,10 @@
         <header class="site-header">
             <div class="header-row">
                 <a class="brand" href="./" aria-label="Dasbor MyIntress">
-                    <img src="./assets/myintress-logo.svg" alt="MyIntress — prototipe" width="132" height="32">
+                    <img src="./myintress-logo.svg" alt="MyIntress — prototipe" width="485" height="130">
                     <span>Kementerian Keuangan RI</span>
                 </a>
-                <button type="button" class="header-action ews-bell" data-ews-trigger aria-label="Buka EWS Financial Advisor KPPN Mamuju, 6 satker dipantau" aria-haspopup="dialog" aria-controls="ews-modal">
+                <button type="button" class="header-action ews-bell" data-tkd-open="peringatan" aria-label="Buka peringatan EWS TKD–APBD" aria-expanded="false" aria-controls="tkd-page">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21a2 2 0 0 0 4 0"/>
                     </svg>
@@ -712,17 +713,13 @@
                     </svg>
                 </span>
                 <div class="ews-alert-copy">
-                    <h2 id="ews-alert-title" class="ews-alert-title">EWS FA — KPPN Mamuju <span class="ews-count">6 Satker Dipantau</span></h2>
-                    <p>Prediksi penyerapan, deviasi Hal III DIPA, risiko IKPA, dan milestone FA</p>
+                    <h2 id="ews-alert-title" class="ews-alert-title">EWS TKD–APBD <span id="tkd-home-count" class="ews-count">2 Jalur Pemantauan</span></h2>
+                    <p id="tkd-home-summary">Risiko penyaluran TKD dan kesiapan informasi RKUD. Periksa sinyal, verifikasi, lalu tetapkan tindak lanjut.</p>
                 </div>
                 <div class="ews-alert-actions">
-                    <button id="ews-alert-dismiss" type="button" class="ews-alert-dismiss" aria-label="Tutup banner EWS"><span aria-hidden="true">×</span></button>
-                    <button type="button" class="ews-detail" data-ews-trigger aria-haspopup="dialog" aria-controls="ews-modal">Buka EWS</button>
+                    <button id="ews-alert-dismiss" type="button" class="ews-alert-dismiss" aria-label="Tutup banner EWS TKD–APBD"><span aria-hidden="true">×</span></button>
+                    <button type="button" class="ews-detail" data-tkd-open="peringatan" aria-expanded="false" aria-controls="tkd-page">Lihat peringatan</button>
                 </div>
-            </section>
-            <section class="tkd-launch-banner" aria-label="Akses demonstrasi EWS TKD">
-               <div><strong><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> EWS Risiko TKD–APBD · Usulan Kelompok 15</strong><p>Dua jalur: risiko penyaluran Dana Desa/DAK dan audit kesiapan informasi saldo RKUD Direktorat PKN. Dilengkapi register kasus, advisori dan evaluasi pilot.</p></div>
-               <button type="button" data-tkd-open aria-expanded="false">Buka EWS TKD <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
             </section>
             <div class="date-banner">
                 <div>
@@ -1178,6 +1175,7 @@
   <section class="tkd-kpis" aria-label="Indikator pengawasan" id="tkd-kpis"></section>
   <div id="tkd-alert-center" class="tkd-alert-center" role="status" aria-live="polite"></div>
   <nav class="tkd-tabs" aria-label="Menu EWS TKD" role="tablist">
+   <button id="tkd-tab-peringatan" class="tkd-tab" role="tab" aria-selected="false" aria-controls="tkd-view-peringatan" data-tkd-tab="peringatan" type="button"><i class="fa-regular fa-bell" aria-hidden="true"></i> Peringatan &amp; Verifikasi</button>
    <button class="tkd-tab" role="tab" aria-selected="true" data-tkd-tab="ikhtisar" type="button"><i class="fa-solid fa-chart-line"></i> Ikhtisar Strategis</button>
    <button class="tkd-tab" role="tab" aria-selected="false" data-tkd-tab="penyaluran" type="button"><i class="fa-solid fa-arrow-right-arrow-left"></i> Jalur A · Penyaluran</button>
    <button class="tkd-tab" role="tab" aria-selected="false" data-tkd-tab="rkud" type="button"><i class="fa-solid fa-vault"></i> Jalur B · RKUD PKN</button>
@@ -1185,6 +1183,19 @@
    <button class="tkd-tab" role="tab" aria-selected="false" data-tkd-tab="evaluasi" type="button"><i class="fa-solid fa-chart-column"></i> Evaluasi Pilot</button>
    <button class="tkd-tab" role="tab" aria-selected="false" data-tkd-tab="pilot" type="button"><i class="fa-solid fa-route"></i> Desain &amp; Tata Kelola</button>
   </nav>
+  <section class="tkd-view" id="tkd-view-peringatan" role="tabpanel" aria-labelledby="tkd-tab-peringatan" hidden>
+   <div class="tkd-surface">
+    <div class="tkd-section-head"><div><h2 tabindex="-1" id="tkd-inbox-title">Peringatan EWS TKD–APBD</h2><p>Pilih isu yang perlu diperiksa. Jumlah mengikuti filter wilayah, pencarian, dan sudut pandang di atas; beranda merangkum seluruh wilayah contoh.</p></div><span class="tkd-tag tkd-sim">UJI ALUR · BUKAN NOTIFIKASI RESMI</span></div>
+    <div class="tkd-grid-even">
+     <div class="tkd-rule"><b>Jalur A · D1–D2 penyaluran</b><p>Sumber dan persyaratan → calon sinyal → verifikasi pejabat pengampu KPPN → keputusan Kepala KPPN dan asistensi pemda → konsolidasi Kanwil bila diperlukan.</p></div>
+     <div class="tkd-rule"><b>Jalur B · D4a informasi RKUD</b><p>Laporan bank → rekap bulanan PKN → cek periode, cakupan, validasi dan izin → distribusi ke analis Kanwil/APK → rekomendasi ALCo. Data tidak memadai tetap ditandai belum layak.</p></div>
+    </div>
+    <div class="tkd-choice-note" style="margin-top:.8rem"><b>Sesudah verifikasi:</b> tetapkan pejabat pemutus, PIC dan target → catat tindakan dan respons → tinjau hasil serta bukti → tutup dan evaluasi. Eskalasi hanya untuk masalah lintas kewenangan. D3/D5 ditelaah selektif; D4b memerlukan sumber tambahan yang sah.</div>
+   </div>
+   <div class="tkd-surface"><div class="tkd-section-head"><div><h2>1. Kandidat sinyal penyaluran</h2><p>Pratinjau aturan latihan belum menjadi kasus terverifikasi. Periksa skenario pada Jalur A sebelum mendaftarkan sinyal; H-14/H-7/H-3 bukan tenggat resmi.</p></div><button type="button" class="tkd-button tkd-outline" data-tkd-jump="penyaluran">Periksa aturan D1–D2</button></div><div id="tkd-inbox-candidates" class="tkd-register"></div></div>
+   <div class="tkd-surface"><div class="tkd-section-head"><div><h2>2. Kasus yang memerlukan keputusan</h2><p>Kasus yang sudah selesai keluar dari antrean dan tetap tersimpan di Register &amp; Aksi. Rujukan ALCo dan skenario latihan diberi label terpisah.</p></div></div><div id="tkd-inbox-cases" class="tkd-register"></div></div>
+   <div class="tkd-surface"><div class="tkd-section-head"><div><h2>3. Kesiapan data RKUD</h2><p>Kekurangan metadata adalah isu kualitas informasi, bukan saldo nol atau temuan TKD mengendap. PKN mengampu rekap; Kanwil/APK memeriksa kelayakan analisis.</p></div><button type="button" class="tkd-button tkd-outline" data-tkd-jump="rkud">Telusuri aliran RKUD</button></div><div id="tkd-inbox-rkud" class="tkd-register"></div></div>
+  </section>
   <section class="tkd-view" id="tkd-view-ikhtisar" role="tabpanel">
   <section class="tkd-surface" aria-labelledby="tkd-decisions-title">
    <div class="tkd-section-head"><div><h2 id="tkd-decisions-title">Meja keputusan pimpinan <span class="tkd-tag tkd-sim">Data simulasi dan rujukan ALCo</span></h2><p>Prioritas pekerjaan yang harus mendapat verifikasi, penanggung jawab, atau tindak lanjut. Bukan status MyIntress operasional.</p></div><button type="button" class="tkd-button tkd-outline tkd-small" data-tkd-jump="register">Buka register <i class="fa-solid fa-arrow-right"></i></button></div>
@@ -1311,7 +1322,7 @@
             <div class="shrink-0 px-4 pt-3.5 pb-3 border-b border-slate-100 bg-slate-50/50">
                 <div class="flex justify-between items-center mb-3">
                     <div class="flex items-center space-x-2">
-                        <img src="./assets/myintress-logo.svg" alt="MyIntress — prototipe" style="width:6.5rem;height:auto">
+                        <img src="./myintress-logo.svg" alt="MyIntress — prototipe" style="width:6.5rem;height:auto">
                         <div>
                             <h3 id="ews-title" class="text-sm font-extrabold text-blue-950 leading-none">Early Warning System (EWS)</h3>
                             <p class="text-[10px] text-slate-500 mt-0.5">Monitoring & Tindak Lanjut Kepala KPPN Mamuju</p>
@@ -2144,7 +2155,7 @@
     const cases=visibleCases(),rkud=visibleRkud();
     const review=cases.filter(x=>['Sinyal','Pemantauan','Perlu konfirmasi data'].includes(x.stage)).length;
     const today=$('tkd-rule-date')?.value||'2026-11-11';
-    const urgentFromRules=getCandidates().filter(x=>evaluateRule(x,today).trigger&&evaluateRule(x,today).days<=7).length;
+    const urgentFromRules=getCandidates().filter(x=>!state.cases.some(c=>c.id==='RULE-'+x.id)&&evaluateRule(x,today).trigger&&evaluateRule(x,today).days<=7).length;
     const urgent=cases.filter(x=>x.deadline&&!['Selesai','Ditindaklanjuti'].includes(x.stage)&&daysBetween(today,x.deadline)!==null&&daysBetween(today,x.deadline)<=7).length;
     const overdue=cases.filter(x=>x.deadline&&x.deadline<today&&x.stage!=='Selesai').length;
     const pending=rkud.filter(x=>!rkudReady(x)).length;
@@ -2175,12 +2186,36 @@
     const actions=all.filter(x=>x.owner||x.deadline||x.stage==='Eskalasi'||x.stage==='Ditindaklanjuti'||x.stage==='Selesai');
     $('tkd-action-rows').innerHTML=actions.map(x=>`<tr><td><strong>${esc(x.id)}</strong><br><span class="tkd-subtle">${esc(x.title)}</span></td><td>${esc(x.owner||'Belum ditetapkan')}</td><td>${esc(x.recommendation||'Belum ditetapkan')}</td><td>${esc(x.deadline||'—')}</td><td><span class="tkd-tag ${stageColor(x.stage)}">${esc(x.stage)}</span></td><td><button class="tkd-button tkd-outline tkd-small" type="button" data-tkd-case="${esc(x.id)}">Perbarui</button></td></tr>`).join('')||'<tr><td colspan="6" class="tkd-empty">Belum ada tindakan dengan PIC/tenggat. Buka kasus untuk melakukan simulasi penugasan.</td></tr>';
   }
-  function rkudReady(x){return x.validation==='Valid'&&x.permission==='Disetujui'&&x.coverage==='Lengkap'&&Boolean(x.period&&x.received&&x.validatedAt&&x.readyAt&&x.kanwilAt)&&[x.received,x.validatedAt,x.readyAt,x.kanwilAt].every((d,i,a)=>i===0||d>=a[i-1]);}
+  function rkudReady(x){return x.validation==='Valid'&&x.permission==='Disetujui'&&x.coverage==='Lengkap'&&Boolean(x.period&&x.received&&x.validatedAt&&x.readyAt&&x.kanwilAt)&&[x.period,x.received,x.validatedAt,x.readyAt,x.kanwilAt].every((d,i,a)=>i===0||d>=a[i-1]);}
   function renderRkud(){
     const rows=visibleRkud();
     $('tkd-rkud-rows').innerHTML=rows.map(x=>`<tr><td><strong>${esc(x.region)}</strong><br>${esc(x.pemda)}</td><td>${esc(x.period||'Belum dikonfirmasi')}<br><span class="tkd-subtle">Diterima PKN: ${esc(x.received||'belum diketahui')}<br>Kanwil: ${esc(x.kanwilAt||'belum diketahui')}</span></td><td>${esc(x.bank)}</td><td><span class="tkd-tag ${x.validation==='Valid'?'tkd-low':'tkd-pending'}">${esc(x.validation)}</span><br><span class="tkd-subtle">Cakupan: ${esc(x.coverage)}</span></td><td><span class="tkd-tag ${x.permission==='Disetujui'?'tkd-low':'tkd-pending'}">${esc(x.permission)}</span></td><td><span class="tkd-tag ${rkudReady(x)?'tkd-low':'tkd-medium'}">${rkudReady(x)?'Metadata siap ditelaah':'Belum layak analisis'}</span></td><td>${esc(x.note)}<div style="margin-top:.55rem"><button type="button" class="tkd-button tkd-outline tkd-small" data-tkd-rkud="${esc(x.id)}">Periksa metadata</button></div></td></tr>`).join('')||'<tr><td colspan="7" class="tkd-empty">Tidak ada metadata RKUD untuk filter aktif.</td></tr>';
   }
   function renderKpis(){ $('tkd-kpis').innerHTML=getKpi().map(x=>`<div class="tkd-kpi"><div class="tkd-kpi-icon" aria-hidden="true" style="font-size:1.15rem">${esc(x.emoji||'📌')}</div><strong>${esc(x.value)}</strong><span>${esc(x.label)}</span><small>${esc(x.small)}</small></div>`).join(''); }
+  function nextCaseAction(x){
+    if(x.stage==='Selesai')return 'Lihat hasil dan bukti penutupan pada register.';
+    if(['Sinyal','Pemantauan','Perlu konfirmasi data'].includes(x.stage))return x.lane==='A'?'Pejabat pengampu KPPN memeriksa sumber, syarat, tenggat dan pengecualian; catat hasil klarifikasi.':'PKN/Kanwil memeriksa periode, cakupan, validasi dan izin distribusi sebelum analisis.';
+    if(x.stage==='Terverifikasi')return x.lane==='A'?'Kepala KPPN menetapkan PIC, target dan asistensi sesuai kewenangan.':'Pemilik data/Kanwil menetapkan PIC dan target perbaikan atau distribusi informasi.';
+    if(x.stage==='Eskalasi')return `Tunggu keputusan ${x.escalationTarget||'unit sesuai kewenangan'}; catat respons dan peninjauan berikutnya.`;
+    return 'Catat respons, hasil yang dapat diuji dan referensi bukti sebelum penutupan; evaluasi pada register.';
+  }
+  function renderAlertInbox(){
+    const date=$('tkd-rule-date').value||'2026-11-11';
+    // Summaries stay separate: a case and its supporting metadata must not be added into one total.
+    const active=state.cases.filter(x=>x.stage!=='Selesai');
+    const missing=state.rkud.filter(x=>!rkudReady(x));
+    $('tkd-home-count').textContent=`${active.length} Kasus Aktif · Simulasi`;
+    $('tkd-home-summary').textContent=`${active.length} kasus menunggu verifikasi/tindak lanjut; ${missing.length} metadata RKUD belum layak telaah. Periksa sumber dan kewenangan sebelum keputusan.`;
+    const candidates=getCandidates().filter(x=>evaluateRule(x,date).trigger&&!state.cases.some(c=>c.id==='RULE-'+x.id));
+    $('tkd-inbox-candidates').innerHTML=candidates.map(x=>{
+      const r=evaluateRule(x,date);
+      return `<article class="tkd-rule"><div class="tkd-inline-tags"><span class="tkd-tag tkd-a">${esc(x.region)} · ${esc(x.dimension)}</span><span class="tkd-tag tkd-sim">Skenario latihan · belum didaftarkan</span></div><b>${esc(x.locality)} · ${esc(x.label)}</b><p>${esc(r.why)}</p><p>Sumber skenario: ${showDate(x.sourceDate)} · evaluasi: ${showDate(date)} · tenggat contoh: ${showDate(x.deadline)}</p><p>Langkah berikutnya: buka Jalur A, periksa aturan dan jalankan pemeriksaan sebelum mendaftarkan sinyal.</p></article>`;
+    }).join('')||'<p class="tkd-empty">Tidak ada kandidat baru sesuai filter. Kasus yang sudah didaftarkan ditampilkan pada antrean keputusan.</p>';
+    const rank=x=>x.stage==='Eskalasi'?0:x.deadline&&x.deadline<date?1:x.severity==='tinggi'?2:3;
+    const cases=visibleCases().filter(x=>x.stage!=='Selesai').sort((a,b)=>rank(a)-rank(b));
+    $('tkd-inbox-cases').innerHTML=cases.map(x=>`<article class="tkd-rule"><div class="tkd-inline-tags"><span class="tkd-tag ${x.lane==='A'?'tkd-a':'tkd-b'}">Jalur ${esc(x.lane)} · ${esc(x.dimension)} · ${esc(x.region)}</span><span class="tkd-tag ${stageColor(x.stage)}">${esc(x.stage)}</span><span class="tkd-tag ${x.origin.includes('ALCo')?'tkd-fact':'tkd-sim'}">${esc(x.origin)}</span></div><b>${esc(x.title)}</b><p>${esc(x.evidence)}</p><p>Sumber: ${esc(x.source)} · PIC: ${esc(x.owner||'belum ditetapkan')} · target: ${esc(x.deadline||'belum ditetapkan')}</p><div class="tkd-choice-note" style="margin:.6rem 0"><b>Langkah berikutnya</b> ${esc(nextCaseAction(x))}</div><button type="button" class="tkd-button tkd-outline" data-tkd-case="${esc(x.id)}">${['Sinyal','Pemantauan','Perlu konfirmasi data'].includes(x.stage)?'Periksa & verifikasi':'Catat keputusan / respons'}</button></article>`).join('')||'<p class="tkd-empty">Tidak ada kasus aktif sesuai filter. Riwayat kasus tetap tersedia di Register &amp; Aksi.</p>';
+    $('tkd-inbox-rkud').innerHTML=($('tkd-role').value==='KPPN'?[]:visibleRkud().filter(x=>!rkudReady(x))).map(x=>`<article class="tkd-rule"><div class="tkd-inline-tags"><span class="tkd-tag tkd-b">D4a · ${esc(x.region)}</span><span class="tkd-tag tkd-pending">Belum layak telaah</span></div><b>${esc(x.pemda)}</b><p>Posisi: ${esc(x.period||'belum diketahui')} · sumber: ${esc(x.bank)} · validasi: ${esc(x.validation)} · cakupan: ${esc(x.coverage)} · izin: ${esc(x.permission)}</p><p>Langkah berikutnya: konfirmasikan metadata dan aliran PKN–Kanwil kepada pengampu. ${esc(x.note||'')}</p><button type="button" class="tkd-button tkd-outline" style="margin-top:.6rem" data-tkd-rkud="${esc(x.id)}">Periksa metadata</button></article>`).join('')||`<p class="tkd-empty">${$('tkd-role').value==='KPPN'?'Verifikasi rekap RKUD berada pada PKN/Kanwil. KPPN memberikan konteks lapangan sesuai mandat.':'Tidak ada metadata belum layak sesuai filter; kelayakan metadata tidak membuktikan kondisi pemanfaatan TKD.'}</p>`;
+  }
   function renderAlerts(){
     const cases=visibleCases(), rows=visibleRkud();
     const needReview=cases.filter(x=>!['Terverifikasi','Ditindaklanjuti','Eskalasi','Selesai'].includes(x.stage)).length;
@@ -2206,7 +2241,7 @@
       if(!bar.hidden)n++;
     }
     $('tkd-bars-empty').hidden=n>0;
-    renderRuleEngine();renderRkudJourney();renderDispatch();renderPilotMetrics();
+    renderRuleEngine();renderRkudJourney();renderDispatch();renderPilotMetrics();renderAlertInbox();
   }
   const launch=()=>{ $('tkd-page').hidden=false;document.querySelector('.dashboard-main').hidden=true;document.querySelector('.site-footer').hidden=true;for(const item of document.querySelectorAll('[data-tkd-open]'))item.setAttribute('aria-expanded','true');window.scrollTo(0,0);renderAll();};
   const close=()=>{$('tkd-page').hidden=true;document.querySelector('.dashboard-main').hidden=false;document.querySelector('.site-footer').hidden=false;for(const item of document.querySelectorAll('[data-tkd-open]'))item.setAttribute('aria-expanded','false');window.scrollTo(0,0);};
@@ -2239,7 +2274,7 @@
     const x=state.cases.find(x=>x.id===id);if(!x)return;
     const log=(x.notes||[]).slice().reverse().map(n=>`<div><b>${esc(n.time)} · ${esc(n.stage)}</b><br>${esc(n.note)}</div>`).join('')||'<p class="tkd-subtle">Belum ada perubahan kasus dalam simulasi.</p>';
     const chronology=[['Pertama dapat diketahui',x.firstKnownAt],['Sinyal dicatat',x.detectedAt],['Terverifikasi',x.verifiedAt],['Tindakan pertama',x.actedAt],['Ditutup',x.closedAt]].filter(y=>y[1]);
-    const html=`<div class="tkd-choice-note"><b>Alur keputusan berbasis bukti</b> — Sinyal → Terverifikasi → Ditindaklanjuti/Eskalasi → Selesai. <b>${esc($('tkd-role').value)}</b> hanyalah sudut pandang simulasi, bukan autentikasi.</div>
+    const html=`<div class="tkd-choice-note"><b>Alur keputusan berbasis bukti</b> — Sinyal → Terverifikasi → Ditindaklanjuti/Eskalasi → Selesai. Sinyal tidak relevan dapat ditutup dengan bukti verifikasi dan alasan. <b>${esc($('tkd-role').value)}</b> hanyalah sudut pandang simulasi, bukan autentikasi.<p style="margin-top:.4rem">${esc(nextCaseAction(x))}</p></div>
     ${chronology.length?`<div class="tkd-timeline">${chronology.map(y=>`<div class="tkd-timeline-item"><strong>${esc(y[0])}</strong>${esc(y[1].replace('T',' '))}</div>`).join('')}</div>`:''}
     <div class="tkd-data-guard" style="margin-top:.8rem"><b>${esc(x.id)} · ${esc(x.region)} · ${esc(x.dimension)}</b><br><b>Fakta/indikasi:</b> ${esc(x.evidence)}<br><b>Sumber:</b> ${esc(x.source)}<br><b>Konteks dan batas kewenangan:</b> ${esc(x.context||'Perlu ditetapkan')}</div>
       <form class="tkd-form" id="tkd-case-form" data-mode="edit" data-id="${esc(x.id)}" style="margin-top:.85rem">
@@ -2257,6 +2292,8 @@
        <label>Kontak/tindakan pertama<input name="actedAt" type="datetime-local" value="${esc(x.actedAt||'')}"></label>
        <label>Penutupan kasus<input name="closedAt" type="datetime-local" value="${esc(x.closedAt||'')}"></label>
        <label>Pejabat pemutus (simulasi)<input name="decider" maxlength="110" value="${esc(x.decider||'')}"></label>
+       <label>Tujuan eskalasi (bila diperlukan)<select name="escalationTarget">${options(['','Kanwil DJPb','Direktorat PKN / pengampu data','Unit pusat pengampu TKD'],x.escalationTarget||'')}</select></label>
+       <label class="tkd-wide">Alasan lintas kewenangan / dukungan yang diminta<textarea name="escalationReason" placeholder="Kasus lokal ditangani KPPN; lintas KPPN dikonsolidasikan Kanwil; aturan atau hak akses diklarifikasi ke pengampu pusat.">${esc(x.escalationReason||'')}</textarea></label>
        <label class="tkd-wide">Referensi bukti tindakan/penutupan (bukan unggahan file rahasia)<input name="evidenceRef" maxlength="200" value="${esc(x.evidenceRef||'')}"></label>
        <label class="tkd-wide">Hasil evaluasi dan pembelajaran<textarea name="evaluation">${esc(x.evaluation||'')}</textarea></label>
        <div class="tkd-wide tkd-form-foot"><p>Prototipe tidak mengirim tiket, pesan, atau data keluar; ini hanya simulasi pengambilan keputusan.</p><button class="tkd-button" type="submit">Simpan perubahan &amp; jejak tindakan</button></div>
@@ -2295,20 +2332,27 @@
       const x=state.cases.find(r=>r.id===form.dataset.id);if(!x)return;
       const stage=values.stage;const note=values.note.trim();
       const allowed={
-        'Sinyal':['Sinyal','Pemantauan','Perlu konfirmasi data','Terverifikasi'],
-        'Pemantauan':['Pemantauan','Perlu konfirmasi data','Terverifikasi'],
-        'Perlu konfirmasi data':['Perlu konfirmasi data','Pemantauan','Terverifikasi'],
-        'Terverifikasi':['Terverifikasi','Ditindaklanjuti','Eskalasi'],
+        'Sinyal':['Sinyal','Pemantauan','Perlu konfirmasi data','Terverifikasi','Selesai'],
+        'Pemantauan':['Pemantauan','Perlu konfirmasi data','Terverifikasi','Selesai'],
+        'Perlu konfirmasi data':['Perlu konfirmasi data','Pemantauan','Terverifikasi','Selesai'],
+        'Terverifikasi':['Terverifikasi','Ditindaklanjuti','Eskalasi','Selesai'],
         'Ditindaklanjuti':['Ditindaklanjuti','Eskalasi','Selesai'],
         'Eskalasi':['Eskalasi','Ditindaklanjuti','Selesai'],
         'Selesai':['Selesai']
       };
       if(!(allowed[x.stage]||[]).includes(stage)){toast(`Tahap tidak dapat langsung berpindah dari “${x.stage}” ke “${stage}”. Lakukan verifikasi/tindakan berjenjang.`);return;}
+      const rejected=values.signalQuality==='Tidak relevan';
+      if(stage==='Selesai'&&['Sinyal','Pemantauan','Perlu konfirmasi data','Terverifikasi'].includes(x.stage)&&!rejected){toast('Kasus relevan harus melalui tindak lanjut sebelum ditutup. Penutupan setelah verifikasi hanya untuk sinyal tidak relevan dengan bukti.');return;}
+      if(rejected&&['Ditindaklanjuti','Eskalasi'].includes(stage)){toast('Sinyal tidak relevan ditutup dengan alasan dan bukti, bukan diteruskan sebagai risiko terkonfirmasi.');return;}
       const role=$('tkd-role').value;
       if(stage!==x.stage && x.lane==='A' && role==='PKN'){toast('Simulasi peran PKN hanya dapat menangani jalur RKUD, bukan keputusan kasus penyaluran.');return;}
       if(stage!==x.stage && x.lane==='B' && role==='KPPN' && stage==='Terverifikasi'){toast('Untuk jalur RKUD, verifikasi data merupakan domain pemilik data/kanwil (simulasi).');return;}
       if(['Terverifikasi','Ditindaklanjuti','Eskalasi','Selesai'].includes(stage)&&!values.verifiedAt){toast('Isi tanggal/jam selesainya verifikasi terlebih dahulu.');return;}
-      if(['Ditindaklanjuti','Eskalasi','Selesai'].includes(stage)&&!values.actedAt){toast('Isi waktu tindakan atau kontak pertama untuk mendukung evaluasi.');return;}
+      if(['Ditindaklanjuti','Eskalasi','Selesai'].includes(stage)&&!rejected&&!values.actedAt){toast('Isi waktu tindakan atau kontak pertama untuk mendukung evaluasi.');return;}
+      if(['Terverifikasi','Ditindaklanjuti','Eskalasi','Selesai'].includes(stage)&&(!values.detectedAt||!values.decider.trim())){toast('Waktu sinyal dan pejabat pengampu/pemutus wajib dicatat untuk keputusan yang dapat ditelusuri.');return;}
+      if(['Ditindaklanjuti','Eskalasi'].includes(stage)&&(!values.deadline||!values.recommendation.trim())){toast('Tetapkan target peninjauan/tindak lanjut dan rencana tindakan sebelum melanjutkan.');return;}
+      if(stage==='Eskalasi'&&(!values.escalationTarget||!values.escalationReason.trim())){toast('Eskalasi memerlukan unit tujuan dan alasan masalah melampaui kewenangan penanganan lokal.');return;}
+      if(stage==='Eskalasi'&&x.lane==='B'&&role==='KPPN'){toast('KPPN memberi konteks lapangan. Keputusan eskalasi kualitas rekap RKUD ditetapkan PKN/Kanwil.');return;}
       if(stage==='Selesai'&&(!values.closedAt||!values.evidenceRef.trim())){toast('Penutupan memerlukan waktu, referensi bukti, dan hasil tindakan.');return;}
       const timeSequence=[values.firstKnownAt,values.detectedAt,values.verifiedAt,values.actedAt,values.closedAt].filter(Boolean);
       if(timeSequence.some((v,i)=>i>0&&v<timeSequence[i-1])){toast('Kronologi waktu tidak urut. Periksa kembali tanggal dan jam.');return;}
@@ -2317,7 +2361,7 @@
       if(stage==='Selesai'&&!values.result.trim()){toast('Catatan hasil penyelesaian harus diisi.');return;}
       if(['Terverifikasi','Ditindaklanjuti','Eskalasi','Selesai'].includes(stage) && !x.evidence.trim()){toast('Bukti awal tidak boleh kosong.');return;}
       const before=x.stage;
-      Object.assign(x,{stage,severity:values.severity,owner:values.owner.trim(),deadline:values.deadline,recommendation:values.recommendation.trim(),result:values.result.trim(),signalQuality:values.signalQuality,updatedAt:clockWIB(),firstKnownAt:values.firstKnownAt,detectedAt:values.detectedAt,verifiedAt:values.verifiedAt,actedAt:values.actedAt,closedAt:values.closedAt,decider:values.decider.trim(),evidenceRef:values.evidenceRef.trim(),evaluation:values.evaluation.trim()});
+      Object.assign(x,{stage,severity:values.severity,owner:values.owner.trim(),deadline:values.deadline,recommendation:values.recommendation.trim(),result:values.result.trim(),signalQuality:values.signalQuality,updatedAt:clockWIB(),firstKnownAt:values.firstKnownAt,detectedAt:values.detectedAt,verifiedAt:values.verifiedAt,actedAt:values.actedAt,closedAt:values.closedAt,decider:values.decider.trim(),evidenceRef:values.evidenceRef.trim(),evaluation:values.evaluation.trim(),escalationTarget:values.escalationTarget,escalationReason:values.escalationReason.trim()});
       if(note)x.notes.push({time:clockWIB(),stage,note});
       logChange(`Status ${before} → ${stage}`,x.id,note || `Penetapan PIC: ${x.owner||'belum ada'}`);
       closeDialog();renderAll();toast('Tindakan dan jejak perubahan simulasi tersimpan.');return;
@@ -2334,7 +2378,7 @@
     }
   }
   function exportCases(){
-    const cols=['id','region','locality','lane','dimension','transfer','title','severity','stage','origin','source','evidence','context','recommendation','owner','deadline','result','updatedAt','firstKnownAt','detectedAt','verifiedAt','actedAt','closedAt','decider','evidenceRef','evaluation'];
+    const cols=['id','region','locality','lane','dimension','transfer','title','severity','stage','origin','source','evidence','context','recommendation','owner','deadline','result','updatedAt','firstKnownAt','detectedAt','verifiedAt','actedAt','closedAt','decider','evidenceRef','evaluation','escalationTarget','escalationReason'];
     downloadText('register_ews_tkd_simulasi.csv',toCSV(visibleCases(),cols));toast('Register contoh diekspor dalam CSV.');
   }
   function exportRkud(){
@@ -2356,7 +2400,7 @@
     }catch(err){toast('Impor ditolak: '+err.message);}
   }
   function bindEvents(){
-    document.querySelectorAll('[data-tkd-open]').forEach(el=>el.addEventListener('click',(e)=>{e.preventDefault();const menu=el.closest('.menu-group');if(menu)menu.open=false;launch();}));
+    document.querySelectorAll('[data-tkd-open]').forEach(el=>el.addEventListener('click',(e)=>{e.preventDefault();const menu=el.closest('.menu-group');if(menu)menu.open=false;launch();switchTab(el.dataset.tkdOpen||'ikhtisar');if(el.dataset.tkdOpen==='peringatan')$('tkd-inbox-title').focus();}));
     document.querySelectorAll('[data-tkd-close]').forEach(el=>el.addEventListener('click',close));
     document.querySelectorAll('[data-tkd-tab]').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tkdTab)));
     document.querySelectorAll('[data-tkd-jump]').forEach(el=>el.addEventListener('click',()=>switchTab(el.dataset.tkdJump)));
@@ -2456,6 +2500,7 @@
     const row=state.rules.find(x=>x.id===id);if(!row)return;
     const linked=state.cases.find(x=>x.id==='RULE-'+id);if(linked){openCase(linked.id);return;}
     const date=$('tkd-rule-date').value;
+    if(!state.ruleRun||state.ruleRun.date!==date){toast('Jalankan pemeriksaan skenario terkini sebelum mendaftarkan sinyal.');return;}
     const result=evaluateRule(row,date);if(!result.trigger){toast('Tidak ada sinyal untuk keadaan data ini.');return;}
     const c={id:'RULE-'+row.id,region:row.region,locality:row.locality,lane:'A',dimension:row.dimension,transfer:row.transfer,
       title:`${row.locality}: ${row.label}`,severity:result.level==='critical'?'tinggi':result.level==='warning'?'sedang':'rendah',stage:'Sinyal',origin:'Deteksi skenario',source:row.source+'; tanggal data '+row.sourceDate,
@@ -2518,7 +2563,7 @@
     const row=state.rules.find(x=>x.id===form.dataset.id);if(!row)return;
     const data=Object.fromEntries(new FormData(form));
     if(data.deadline<data.sourceDate){toast('Tenggat contoh tidak boleh sebelum tanggal terbit data skenario.');return;}
-    Object.assign(row,data);logChange('Skenario aturan diubah',row.id,`${row.document}; batas ${row.deadline}`);
+    Object.assign(row,data);state.ruleRun=null;logChange('Skenario aturan diubah',row.id,`${row.document}; batas ${row.deadline}`);
     closeDialog();renderAll();toast('Skenario diubah; status deteksi diperhitungkan ulang.');
   }
   function bindV4(){

@@ -14,6 +14,7 @@ Jangan memakai GitHub Pages sebagai tempat menyimpan data operasional. Hindari m
 
 ## Fitur interaktif
 
+- **Peringatan & verifikasi**: tombol alert dan lonceng membuka antrean kandidat D1–D2, kasus aktif, dan kualitas metadata RKUD. Setiap kasus menunjukkan sumber dan langkah berikutnya; jumlah kasus dan metadata tidak dijumlahkan menjadi satu skor risiko.
 - **Ikhtisar strategis**: prioritas yang perlu keputusan, ringkasan kasus, konteks ALCo NTT/Bali September 2026.
 - **Jalur A — Penyaluran**: skenario rule-based D1–D2, tanggal evaluasi yang dapat diubah, countdown tenggat **ilustratif** (H-14/H-7/H-3), dan tombol untuk mendaftarkan sinyal ke register.
 - **Jalur B — RKUD**: metadata pelaporan bank ke PKN, tanggal validasi, siap distribusi, diterima Kanwil, dipakai ALCo; status izin/cakupan; perhitungan jeda yang hanya muncul bila tanggal lengkap.
@@ -23,9 +24,9 @@ Jangan memakai GitHub Pages sebagai tempat menyimpan data operasional. Hindari m
 
 ## Panduan demonstrasi lima menit
 
-1. Dari halaman awal, klik **Buka EWS TKD**, lalu pada tab **Jalur A** ubah tanggal evaluasi jika perlu dan klik **Jalankan pemeriksaan**.
-2. Lihat satu kasus mendekati tenggat, klik **Daftarkan sinyal**, isi **Verifikasi selesai**, keterangan bukti, ubah status ke **Terverifikasi**, lalu simpan.
-3. Buka kasus lagi, tetapkan PIC/tenggat dan **Kontak/tindakan pertama**, ubah status ke **Ditindaklanjuti**, lalu simpan. Anda tidak dapat melompati tahapan.
+1. Dari halaman awal, klik **Lihat peringatan** atau lonceng. Baca sumber dan langkah berikutnya pada **Peringatan & Verifikasi**. Buka **Jalur A**, ubah tanggal evaluasi jika perlu dan klik **Jalankan pemeriksaan**.
+2. Lihat satu kasus mendekati tenggat, klik **Daftarkan sinyal**, isi **Sinyal dicatat**, **Verifikasi selesai**, **Pejabat pemutus**, keterangan bukti, ubah status ke **Terverifikasi**, lalu simpan.
+3. Buka kasus lagi, tetapkan PIC, tenggat, rencana tindakan dan **Kontak/tindakan pertama**, ubah status ke **Ditindaklanjuti**, lalu simpan. Eskalasi memerlukan tujuan dan alasan lintas kewenangan. Penutupan memerlukan hasil, waktu dan bukti; sinyal **Tidak relevan** dapat ditutup setelah verifikasi tanpa tindakan lapangan fiktif.
 4. Pada **Jalur B — RKUD**, buka satu metadata contoh lalu bandingkan tanggal PKN siap dan Kanwil menerima. Perhatikan wilayah belum diverifikasi tetap berstatus **belum layak**, bukan saldo nol.
 5. Buka **Evaluasi Pilot**, lihat waktu respons yang dihitung dari timestamps, ubah baseline hipotetis, dan jelaskan gerbang keputusan bulan 2/4/6.
 
