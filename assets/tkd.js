@@ -139,7 +139,7 @@
   function renderWork(){
     const all=workForRole(),rows=ordered(all.filter(matches));
     $('tkd-task-count').textContent=String(all.length);
-    $('tkd-work-summary').textContent=rows.length+' dari '+all.length+' pekerjaan untuk '+profile().label+'. Urutan mengikuti target dan kebutuhan keputusan.';
+    $('tkd-work-summary').textContent=rows.length===all.length?all.length+' pekerjaan, diurutkan menurut target dan kebutuhan keputusan.':rows.length+' dari '+all.length+' pekerjaan cocok dengan filter.';
     $('tkd-inbox-cases').innerHTML=currentTab==='peringatan'&&!$('tkd-page').hidden?(rows.map(workCard).join('')||emptyMessage(all.length?'Tidak ada pekerjaan yang cocok dengan filter.':'Tidak ada tindakan yang menunggu pengguna ini. Riwayat tersedia di Semua kasus.')):'';
     const missing=sourceScope().filter(x=>!rkudReady(x)).length;
     $('tkd-data-attention').hidden=isKppn()||missing===0;
@@ -153,7 +153,7 @@
   }
   function renderSummary(){
     const cases=roleScope(),rkud=sourceScope(),role=$('tkd-role').value;
-    $('tkd-summary-title').textContent='Ringkasan · '+profile().label;$('tkd-summary-description').textContent=profile().focus+'. Seluruh kasus sesuai kewenangan, tanpa filter daftar.';
+    $('tkd-summary-title').textContent='Ringkasan tindak lanjut';$('tkd-summary-description').textContent=profile().focus+'. Seluruh kasus sesuai kewenangan, tanpa filter daftar.';
     const k=(value,label,description,filter,view='register')=>({value,label,description,filter,view});
     const items=role==='KPPN'?[k(cases.filter(earlyStage).length,'Perlu pemeriksaan','Konfirmasi fakta dan persyaratan','review'),k(cases.filter(x=>['Ditugaskan','Ditindaklanjuti'].includes(x.stage)).length,'Dalam penanganan','Catat tindakan dan respons','progress'),k(cases.filter(x=>x.stage==='Menunggu persetujuan').length,'Menunggu Kepala KPPN','Lihat usulan dan bukti','approval')]:role==='KepalaKPPN'?[k(cases.filter(x=>x.stage==='Terverifikasi').length,'Perlu penugasan','Tetapkan PIC dan target','plan'),k(cases.filter(x=>x.stage==='Menunggu persetujuan').length,'Perlu persetujuan','Periksa hasil petugas','approval'),k(cases.filter(overdue).length,'Target terlewat','Prioritaskan arahan','overdue')]:role==='Kanwil'?[k(cases.filter(x=>x.stage==='Eskalasi'&&x.escalationTarget==='Kanwil DJPb').length,'Permintaan dukungan','Konsolidasikan hambatan KPPN','support'),k(rkud.filter(x=>!rkudReady(x)).length,'RKUD perlu kelengkapan','Periksa simpul data yang kosong','missing','rkud'),k(rkud.filter(rkudReady).length,'RKUD siap telaah','Lihat sumber dan periode','ready','rkud')]:[k(rkud.filter(x=>!rkudReady(x)).length,'Perlu pemeriksaan data','Cakupan, validasi dan izin','missing','rkud'),k(cases.filter(x=>x.stage!=='Selesai').length,'Kasus sumber aktif','Tindak lanjuti isu sumber','all'),k(rkud.filter(rkudReady).length,'Rekap siap telaah','Jejak distribusi lengkap','ready','rkud')];
     $('tkd-kpis').innerHTML=items.map(x=>'<button type="button" class="tkd-kpi" data-kpi-view="'+x.view+'" data-kpi-filter="'+x.filter+'"><strong>'+esc(x.value)+'</strong><span>'+esc(x.label)+'</span><small>'+esc(x.description)+' →</small></button>').join('');
