@@ -1,0 +1,3 @@
+region,pemda,bank,period,received,validatedAt,readyAt,kanwilAt,alcoAt,validation,permission,coverage,note
+"Bali","DATA SINTETIS - Rekap contoh Bali","Bank demonstrasi (bukan bank riil)","2026-09-30","2026-10-04","2026-10-06","2026-10-07","2026-10-09","2026-10-12","Valid","Disetujui","Lengkap","Simulasi alur data: seluruh tanggal dan status bukan fakta operasional"
+"NTT","DATA SINTETIS - Rekap contoh NTT","Bank demonstrasi (bukan bank riil)","2026-09-30","2026-10-05","2026-10-08","2026-10-09","","","Perlu koreksi","Belum disetujui","Sebagian","Simulasi: metadata belum layak diolah"
