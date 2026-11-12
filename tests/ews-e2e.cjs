@@ -73,28 +73,47 @@ async function reset(){await ev(()=>{const seed=window.MYINTRESS_TKD_SEED;localS
  assert('Future action rejected',await ev(id=>qa.current(id).stage==='Sinyal',id));
  await ev(()=>qa.save({occurredAt:qa.now}));
  assert('Verified case routed out of petugas queue',await ev(id=>qa.current(id).stage==='Terverifikasi'&&!qa.$('#tkd-inbox-cases [data-case-record="'+id+'"]'),id));
+ assert('Verification receipt names chief and pending decision',await ev(()=>!qa.$('#tkd-outcome').hidden&&qa.$('#tkd-outcome').textContent.includes('Kepala KPPN')&&qa.$('#tkd-outcome').textContent.includes('Penetapan PIC')));
+ await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});
+ assert('Mobile receipt fits and receives keyboard focus',await ev(()=>{const b=qa.$('#tkd-outcome'),r=b.getBoundingClientRect();return document.activeElement===b&&r.left>=0&&r.right<=innerWidth&&b.scrollWidth<=b.clientWidth+1;}));
+ fs.writeFileSync(path.join(out,'hasil-verifikasi-390.png'),Buffer.from((await call('Page.captureScreenshot',{format:'png'})).data,'base64'));
+ await call('Emulation.setDeviceMetricsOverride',{width:1366,height:768,deviceScaleFactor:1,mobile:false});
  await ev(id=>{qa.user('KPPN');qa.popup();qa.detail(id);},id);
  assert('Petugas cannot assign own verified case',await ev(()=>!qa.$('#tkd-dialog [data-case-action=plan]')));
  await ev(id=>{qa.user('KepalaKPPN');qa.popup();qa.action(id,'plan');qa.save({owner:'Ni Putu Wulandari',deadline:qa.target,recommendation:'Klarifikasi dokumen ke pengampu'});},id);
  assert('Assignment records no fictional first action',await ev(id=>qa.current(id).stage==='Ditugaskan'&&qa.current(id).assignedAt&&!qa.current(id).actedAt,id));
+ assert('Assignment receipt returns work to assigned petugas',await ev(()=>qa.$('#tkd-outcome').textContent.includes('Ni Putu Wulandari')&&qa.$('#tkd-outcome').textContent.includes('Pelaksanaan rencana')));
  await ev(id=>{qa.user('KPPN');qa.popup();qa.action(id,'progress');qa.save({note:'Klarifikasi dilaksanakan dan respons diterima',deadline:qa.target});},id);
  assert('Actual progress has petugas actor',await ev(id=>qa.current(id).stage==='Ditindaklanjuti'&&qa.current(id).actedAt&&qa.current(id).notes.at(-1).actor==='Ni Putu Wulandari',id));
  await ev(id=>qa.action(id,'escalate'),id);
  assert('Petugas escalation only to chief',await ev(()=>[...qa.$('#tkd-action-form').elements.escalationTarget.options].filter(x=>x.value).map(x=>x.value).join()==='Kepala KPPN'));
  await ev(()=>qa.save({escalationTarget:'Kepala KPPN',deadline:qa.target,escalationReason:'Memerlukan arahan lintas unit'}));
+ assert('Petugas support receipt names chief, not Kanwil',await ev(()=>qa.$('#tkd-outcome').textContent.includes('Kepala KPPN')&&!qa.$('#tkd-outcome').textContent.includes('Analis Kanwil')));
  await ev(id=>{qa.user('KepalaKPPN');qa.popup();qa.action(id,'escalate');qa.save({escalationTarget:'Kanwil DJPb',deadline:qa.target,escalationReason:'Memerlukan konsolidasi regional'});},id);
  assert('Chief forwards to an available role, no dead-end central target',await ev(id=>qa.current(id).escalationTarget==='Kanwil DJPb',id));
+ assert('Chief support receipt names Bali analyst',await ev(()=>qa.$('#tkd-outcome').textContent.includes('Analis Kanwil')&&qa.$('#tkd-outcome').textContent.includes('Ni Kadek Maharani')));
  await ev(id=>{qa.user('Kanwil');qa.popup();qa.action(id,'respond');qa.save({note:'Arahan konsolidasi diberikan',deadline:qa.target});},id);
  assert('Kanwil response returns case to implementation',await ev(id=>qa.current(id).stage==='Ditindaklanjuti'&&!!qa.current(id).regionalResponse,id));
+ assert('Regional response receipt names implementing petugas',await ev(()=>qa.$('#tkd-outcome').textContent.includes('Petugas KPPN')&&qa.$('#tkd-outcome').textContent.includes('Ni Putu Wulandari')));
+ await ev(id=>{qa.user('KPPN');qa.popup();qa.tab('register');qa.$('#tkd-search').value=id;qa.$('#tkd-search').dispatchEvent(new Event('input'));},id);
+ assert('Returning petugas sees latest Kanwil instruction on case card',await ev(()=>qa.$('#tkd-cases-all article .tkd-work-next').textContent.includes('Arahan konsolidasi diberikan')));
  await ev(id=>{qa.user('KPPN');qa.popup();qa.action(id,'finish');qa.save({result:'Perbaikan dokumen lengkap',evidenceRef:'BA-AUDIT-01'});},id);
  assert('Petugas proposal is not final closure',await ev(id=>qa.current(id).stage==='Menunggu persetujuan'&&!qa.current(id).closedAt,id));
+ assert('Closure proposal receipt awaits evidence approval',await ev(()=>qa.$('#tkd-outcome').textContent.includes('Kepala KPPN')&&qa.$('#tkd-outcome').textContent.includes('Pemeriksaan hasil dan bukti')));
  await ev(id=>{qa.user('KepalaKPPN');qa.popup();qa.action(id,'returnWork');},id);
  assert('Direct review form includes proposed evidence',await ev(()=>qa.$('#tkd-dialog-content').textContent.includes('BA-AUDIT-01')));
  await ev(()=>qa.save({note:'Lengkapi respons terakhir',deadline:qa.target}));
  assert('Chief can return proposal',await ev(id=>qa.current(id).stage==='Ditindaklanjuti'&&!qa.current(id).proposedAt,id));
+ await ev(id=>{qa.user('KPPN');qa.popup();qa.tab('register');qa.$('#tkd-search').value=id;qa.$('#tkd-search').dispatchEvent(new Event('input'));},id);
+ assert('Returned work shows new correction instruction instead of old regional advice',await ev(()=>{const t=qa.$('#tkd-cases-all article .tkd-work-next').textContent;return t.includes('Lengkapi respons terakhir')&&!t.includes('Arahan konsolidasi diberikan');}));
+ await ev(()=>{const original=URL.createObjectURL;URL.createObjectURL=blob=>{window.exportBlob=blob;return original(blob);};qa.$('#tkd-export').click();});
+ const caseExport=await ev(()=>window.exportBlob.text());
+ assert('Register export preserves latest correction instruction and impact column',caseExport.includes('nextInstruction')&&caseExport.includes('impact')&&caseExport.includes('Lengkapi respons terakhir'));
  await ev(id=>{qa.user('KPPN');qa.popup();qa.action(id,'finish');qa.save({result:'Respons dan bukti telah lengkap',evidenceRef:'BA-AUDIT-02'});qa.user('KepalaKPPN');qa.popup();qa.action(id,'approve');qa.save({note:'Hasil dan bukti disetujui'});},id);
  assert('Closure requires chief and preserves proof',await ev(id=>qa.current(id).stage==='Selesai'&&qa.current(id).approvedBy==='I Made Pranata'&&qa.current(id).evidenceRef==='BA-AUDIT-02',id));
+ assert('Closure receipt does not claim money was spent',await ev(()=>qa.$('#tkd-outcome').textContent.includes('penanganan kasus ditutup')||qa.$('#tkd-outcome').textContent.includes('Penanganan kasus ditutup')));
  await ev(id=>qa.detail(id),id);assert('Finished case is read-only',await ev(()=>!qa.$('#tkd-dialog [data-case-action]')));
+ assert('Case separates disbursement, APBD expenditure and resolution',await ev(()=>{const t=qa.$('.tkd-fiscal-context').textContent;return t.includes('Penyaluran TKD')&&t.includes('Belanja APBD')&&t.includes('Penanganan masalah')&&t.includes('Belum dikonfirmasi')&&t.includes('bukan bukti dana sudah disalurkan');}));
  await ev(()=>{qa.user('KPPN');qa.popup();qa.action('DPS-TKD-2026-011','reject');qa.save({note:'Pemicu tidak sesuai hasil pemeriksaan',evidenceRef:'BA-KOREKSI-01'});qa.user('KepalaKPPN');qa.popup();qa.action('DPS-TKD-2026-011','returnWork');qa.save({note:'Periksa kembali sumber',deadline:qa.target});});
  assert('Returned irrelevant signal requires verification again',await ev(()=>qa.current('DPS-TKD-2026-011').stage==='Sinyal'&&!qa.current('DPS-TKD-2026-011').verifiedAt));
  await ev(()=>{qa.user('KPPN');qa.popup();qa.action('DPS-TKD-2026-011','reject');qa.save({note:'Dikonfirmasi tidak relevan',evidenceRef:'BA-KOREKSI-02'});qa.user('KepalaKPPN');qa.popup();qa.action('DPS-TKD-2026-011','approve');qa.save({note:'Koreksi dikonfirmasi'});});
@@ -106,16 +125,27 @@ async function reset(){await ev(()=>{const seed=window.MYINTRESS_TKD_SEED;localS
  assert('Valid source requires actual validation dates',await ev(()=>!qa.$('#tkd-dialog').hidden&&qa.$('#tkd-rkud-form [role=alert]').textContent.includes('tanggal')));
  await ev(()=>{const f=qa.$('#tkd-rkud-form');f.elements.validatedAt.value='2026-11-05';f.elements.readyAt.value='2026-11-06';f.elements.kanwilAt.disabled=false;f.elements.kanwilAt.value='2026-11-08';f.requestSubmit();});
  assert('Forged analyst field ignored in PKN save',await ev(()=>!qa.data().rkud.find(x=>x.id==='RKUD-DPS-202610-02').kanwilAt));
+ assert('Ready source receipt awaits Kanwil receipt',await ev(()=>qa.$('#tkd-outcome').textContent.includes('Analis Kanwil')&&qa.$('#tkd-outcome').textContent.includes('Pencatatan penerimaan')));
  await ev(()=>{qa.user('Kanwil');qa.popup();qa.$('[data-tkd-jump=rkud]').click();qa.$('[data-tkd-rkud="RKUD-DPS-202610-02"]').click();});
  assert('Analyst cannot edit source validation',await ev(()=>qa.$('#tkd-rkud-form').elements.validation.disabled));
  await ev(()=>{const f=qa.$('#tkd-rkud-form');f.elements.validation.disabled=false;f.elements.validation.value='Perlu koreksi';f.elements.kanwilAt.value='2026-11-08';f.elements.alcoAt.value='2026-11-10';f.elements.note.value='Sudah digunakan dalam analisis';f.requestSubmit();});
  assert('Source validation remains authoritative',await ev(()=>qa.data().rkud.find(x=>x.id==='RKUD-DPS-202610-02').validation==='Valid'));
  await ev(()=>{qa.user('PKN');qa.popup();qa.$('[data-tkd-jump=rkud]').click();qa.$('#tkd-rkud-filter').value='all';qa.$('#tkd-rkud-filter').dispatchEvent(new Event('change'));qa.$('[data-tkd-rkud="RKUD-DPS-202610-02"]').click();const f=qa.$('#tkd-rkud-form');f.elements.note.value='Catatan sumber PKN';f.elements.bank.value='Bank BPD Bali • rekonsiliasi';f.requestSubmit();});
  assert('Source correction flags downstream review',await ev(()=>qa.data().rkud.find(x=>x.id==='RKUD-DPS-202610-02').analysisNeedsReview===true));
+ assert('Source correction receipt requests renewed analyst review',await ev(()=>qa.$('#tkd-outcome').textContent.includes('Peninjauan ulang Kanwil')));
  await ev(()=>{qa.user('Kanwil');qa.popup();qa.$('[data-tkd-jump=rkud]').click();qa.$('[data-tkd-rkud="RKUD-DPS-202610-02"]').click();});
  assert('Analyst explicitly acknowledges revised source',await ev(()=>!!qa.$('#tkd-rkud-form').elements.reviewAck));
  await ev(()=>{const f=qa.$('#tkd-rkud-form');f.elements.reviewAck.checked=true;f.elements.note.value='Analisis diperiksa ulang';f.requestSubmit();});
  assert('Analyst note does not overwrite source note',await ev(()=>{const r=qa.data().rkud.find(x=>x.id==='RKUD-DPS-202610-02');return r.sourceNote==='Catatan sumber PKN'&&r.analysisNote==='Analisis diperiksa ulang'&&!r.analysisNeedsReview;}));
+ await ev(()=>{qa.user('PKN');qa.popup();qa.$('[data-tkd-jump=rkud]').click();qa.$('#tkd-rkud-filter').value='all';qa.$('#tkd-rkud-filter').dispatchEvent(new Event('change'));qa.$('[data-tkd-rkud="RKUD-DPS-202610-02"]').click();qa.$('#tkd-rkud-form').requestSubmit();const original=URL.createObjectURL;URL.createObjectURL=blob=>{window.staleReceiptCsv=blob;return original(blob);};qa.$('#tkd-rkud-export').click();});
+ assert('Metadata save shows receipt before importing',await ev(()=>!qa.$('#tkd-outcome').hidden));
+ await ev(async()=>qa.import(await window.staleReceiptCsv.text()));
+ assert('Successful import clears stale save receipt',await ev(()=>qa.$('#tkd-outcome').hidden));
+ await reset();await ev(()=>{qa.user('Kanwil');qa.popup();qa.tab('register');});
+ assert('Read-only KPPN alert tells analyst who must verify',await ev(()=>{const c=qa.$('[data-case-record="DPS-TKD-2026-011"]');return c.querySelector('.tkd-work-next').textContent.includes('Menunggu Petugas KPPN')&&!c.querySelector('[data-case-action]');}));
+ assert('Read-only verified source tells analyst to wait for PKN',await ev(()=>qa.$('[data-case-record="BALI-RKUD-2026-022"] .tkd-work-next').textContent.includes('Menunggu Pengampu PKN')));
+ await ev(()=>{qa.user('KepalaKPPN');qa.popup();qa.tab('register');});
+ assert('Chief early-stage instruction matches assignment authority',await ev(()=>{const c=qa.$('[data-case-record="DPS-TKD-2026-011"]');return c.querySelector('.tkd-work-next').textContent.includes('Tetapkan petugas')&&c.querySelector('[data-case-action=assignReview]');}));
  // CSV round-trip through actual export and file-input handlers.
  await reset();await ev(()=>{qa.user('PKN');qa.popup();qa.$('[data-tkd-jump=rkud]').click();qa.$('#tkd-rkud-filter').value='all';qa.$('#tkd-rkud-filter').dispatchEvent(new Event('change'));const original=URL.createObjectURL;URL.createObjectURL=blob=>{window.exportBlob=blob;return original(blob);};qa.$('#tkd-rkud-template').click();});
  const csv=await ev(()=>window.exportBlob.text());
@@ -150,11 +180,26 @@ async function reset(){await ev(()=>{const seed=window.MYINTRESS_TKD_SEED;localS
  assert('Tematik entry opens same popup',await ev(()=>!qa.$('#tkd-page').hidden&&document.querySelectorAll('#tkd-page').length===1));
  await reset();await ev(()=>{const seed=window.MYINTRESS_TKD_SEED,s=qa.data();s.cases[1].deadline='2026-01-01';localStorage.setItem(seed.key,JSON.stringify(s));window.dispatchEvent(new StorageEvent('storage',{key:seed.key}));qa.popup();});
  assert('Overdue target receives highest priority',await ev(()=>qa.$('#tkd-inbox-cases article .tkd-high').textContent.includes('Terlambat')));
+ await reset();await ev(()=>{const seed=window.MYINTRESS_TKD_SEED,s=qa.data();s.cases=s.cases.filter(x=>x.lane==='A').slice(0,2).map((x,i)=>({...x,id:'PRIORITAS-'+i,stage:'Sinyal',deadline:qa.target,severity:i?'tinggi':'rendah'}));localStorage.setItem(seed.key,JSON.stringify(s));window.dispatchEvent(new StorageEvent('storage',{key:seed.key}));qa.popup();});
+ assert('High impact outranks low impact with same target',await ev(()=>qa.$('#tkd-inbox-cases article').dataset.caseRecord==='PRIORITAS-1'));
+ assert('Alert shows location, transfer, impact and next action without opening details',await ev(()=>{const c=qa.$('#tkd-inbox-cases article');return c.querySelector('.tkd-location').textContent.includes('Kota Denpasar')&&c.querySelector('.tkd-impact').textContent.includes('Dampak tinggi')&&c.querySelector('.tkd-work-next')&&!c.querySelector('details').open;}));
+ await ev(()=>{qa.$('#tkd-inbox-cases [data-case-action=confirm]').click();qa.save({note:'Fakta telah diperiksa'});qa.$('[data-dismiss-outcome]').click();});
+ assert('Receipt can be dismissed without changing workflow',await ev(()=>qa.$('#tkd-outcome').hidden&&qa.data().cases.find(x=>x.id==='PRIORITAS-1').stage==='Terverifikasi'));
+ await ev(()=>{qa.user('KepalaKPPN');qa.popup();});assert('Changing role does not show previous user receipt',await ev(()=>qa.$('#tkd-outcome').hidden));
  await reset();await ev(()=>{qa.user('PKN');qa.popup();qa.action('BALI-RKUD-2026-021','confirm');qa.save({note:'Sumber diperiksa'});qa.action('BALI-RKUD-2026-021','plan');qa.save({owner:'Rizky Pratama',deadline:qa.target,recommendation:'Rekonsiliasi sumber'});qa.action('BALI-RKUD-2026-021','escalate');qa.save({deadline:qa.target,escalationTarget:'Kanwil DJPb',escalationReason:'Memerlukan konfirmasi kebutuhan analisis'});});
  assert('Source request waits for recipient role',await ev(()=>!qa.$('#tkd-inbox-cases [data-case-record="BALI-RKUD-2026-021"]')));
  await ev(()=>{qa.user('Kanwil');qa.popup();qa.action('BALI-RKUD-2026-021','respond');qa.save({note:'Kebutuhan periodisasi telah dijelaskan',deadline:qa.target});qa.user('PKN');qa.popup();});
  assert('RKUD response returns to requesting role',await ev(()=>!!qa.$('#tkd-inbox-cases [data-case-record="BALI-RKUD-2026-021"]')));
  // Persistence, keyboard and responsiveness.
+ for(const [role,id,action]of [['KPPN','DPS-TKD-2026-011','confirm'],['KepalaKPPN','DPS-TKD-2026-013','plan'],['Kanwil','DPS-TKD-2026-015','respond'],['PKN','BALI-RKUD-2026-021','confirm']]){
+  await reset();await ev(([role,id,action])=>{qa.user(role);qa.popup();qa.action(id,action);},[role,id,action]);
+  for(const [width,height]of [[1366,768],[390,844],[320,700]]){
+   await call('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
+   assert('Action form fits '+role+' '+width,await ev(()=>{const d=qa.$('.tkd-dialog'),r=d.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&d.scrollWidth<=d.clientWidth+1;}));
+   assert('Save button reachable '+role+' '+width,await ev(()=>{const b=qa.$('#tkd-action-form [type=submit]');b.scrollIntoView({block:'center'});const r=b.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth;}));
+  }
+ }
+ await reset();await ev(()=>{qa.user('PKN');qa.popup();qa.action('BALI-RKUD-2026-021','confirm');qa.save({note:'Sumber diperiksa'});qa.action('BALI-RKUD-2026-021','plan');qa.save({owner:'Rizky Pratama',deadline:qa.target,recommendation:'Rekonsiliasi sumber'});qa.action('BALI-RKUD-2026-021','escalate');qa.save({deadline:qa.target,escalationTarget:'Kanwil DJPb',escalationReason:'Memerlukan konfirmasi kebutuhan analisis'});qa.user('Kanwil');qa.popup();qa.action('BALI-RKUD-2026-021','respond');qa.save({note:'Kebutuhan periodisasi telah dijelaskan',deadline:qa.target});qa.user('PKN');qa.popup();});
  await call('Page.reload');await until(()=>ev(()=>document.readyState==='complete'&&document.querySelector('#header-user-role').textContent==='Pengampu PKN'));await helpers();
  assert('User and workflow survive reload',await ev(()=>qa.data().cases.find(x=>x.id==='BALI-RKUD-2026-021').regionalResponse==='Kebutuhan periodisasi telah dijelaskan'));
  await ev(()=>{qa.popup();qa.$('[data-tkd-tab=peringatan]').focus();qa.$('[data-tkd-tab=peringatan]').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));});
@@ -188,6 +233,9 @@ async function reset(){await ev(()=>{const seed=window.MYINTRESS_TKD_SEED;localS
  await reset();await ev(()=>{const seed=window.MYINTRESS_TKD_SEED,s=qa.data();const x=s.cases.find(x=>x.stage==='Ditindaklanjuti');for(let i=0;i<300;i++)s.cases.push({...x,id:'PERF-'+i,title:'Pengujian kapasitas '+i});localStorage.setItem(seed.key,JSON.stringify(s));window.dispatchEvent(new StorageEvent('storage',{key:seed.key}));qa.popup();});
  metrics.filter300CasesMs=await ev(()=>{const a=[];for(let i=0;i<5;i++){const t=performance.now();qa.$('#tkd-search').value=i%2?'kapasitas':'tidak cocok';qa.$('#tkd-search').dispatchEvent(new Event('input'));a.push(performance.now()-t);}return a;});
  assert('Filtering 300 added cases remains correct',await ev(()=>document.querySelectorAll('#tkd-inbox-cases article').length===0));
+ await reset();await ev(()=>{qa.popup();qa.action('DPS-TKD-2026-011','confirm');window.originalStorageSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k===window.MYINTRESS_TKD_SEED.key)throw new DOMException('Full','QuotaExceededError');return window.originalStorageSet.call(this,k,v);};qa.save({note:'Verifikasi saat penyimpanan penuh'});});
+ assert('Failed storage does not show a successful save receipt',await ev(()=>qa.$('#tkd-outcome h2').textContent.includes('hanya tersedia pada sesi ini')&&qa.$('#tkd-outcome').textContent.includes('dapat hilang')));
+ await ev(()=>Storage.prototype.setItem=window.originalStorageSet);
  await reset();assert('No uncaught application errors',runtimeErrors.length===0,runtimeErrors);
  console.log(JSON.stringify({passed:results.filter(x=>x.pass).length,total:results.length,metrics,artifacts:out},null,2));
 })().catch(error=>{console.error(error.stack);process.exitCode=1;}).finally(async()=>{

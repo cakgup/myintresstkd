@@ -343,5 +343,24 @@ window.MYINTRESS_TKD_SEED = (() => {
   }
 ];
 
-return {version:VERSION,key:STORAGE_KEY,cases:baseCases,rkud:baseRkud};
+  const impacts={
+    'DPS-TKD-2026-011':'Kelengkapan yang tertunda dapat menggeser penyaluran Dana Desa dan jadwal kegiatan desa.',
+    'DPS-TKD-2026-012':'Koreksi berita acara dapat menunda tahapan penyaluran DAK Fisik jalan dan ketersediaan dana kegiatan.',
+    'DPS-TKD-2026-013':'Referensi dokumen yang belum sesuai dapat menghambat penyaluran DAK Fisik kesehatan.',
+    'DPS-TKD-2026-014':'Persetujuan yang tertunda membuat hasil penyelesaian dokumen Dana Desa belum final dalam register.',
+    'DPS-TKD-2026-015':'Perbedaan penafsiran kontrak dapat menunda penyaluran dan jadwal pembiayaan kegiatan DAK Fisik.',
+    'DPS-TKD-2026-016':'Kesesuaian dokumen mendukung kelanjutan proses penyaluran; realisasi belanja mengikuti laporan APBD.',
+    'BALI-RKUD-2026-021':'Cakupan rekening yang belum lengkap dapat menyesatkan pembacaan posisi kas daerah.',
+    'BALI-RKUD-2026-022':'Rekap yang belum siap didistribusikan membatasi bahan analisis kas daerah untuk ALCo.',
+    'BALI-RKUD-2026-023':'Penafsiran rekap yang belum ditelaah dapat menghasilkan kesimpulan fiskal yang keliru.'
+  };
+  const plans={
+    'DPS-TKD-2026-011':'Klarifikasi surat pengantar dan lembar konfirmasi Dana Desa yang belum lengkap; catat dokumen yang diterima.',
+    'DPS-TKD-2026-012':'Cocokkan berita acara perbaikan dengan nilai dan referensi kontrak DAK Fisik jalan; catat hasil pemeriksaan.',
+    'DPS-TKD-2026-013':'Tetapkan PIC untuk mencocokkan referensi dokumen DAK Fisik kesehatan bersama pengampu.',
+    'BALI-RKUD-2026-021':'Rekonsiliasi daftar rekening dengan bank pelapor, lalu perbarui cakupan dan hasil validasi sumber.',
+    'BALI-RKUD-2026-022':'Periksa persetujuan akses dan kesiapan rekap, lalu catat tanggal siap distribusi ke Kanwil.',
+    'BALI-RKUD-2026-023':'Telaah catatan metodologi dan batasan cakupan rekening; cantumkan implikasinya pada bahan ALCo.'
+  };
+return {version:VERSION,key:STORAGE_KEY,cases:baseCases.map(x=>({...x,impact:impacts[x.id]||x.impact,recommendation:plans[x.id]||x.recommendation})),rkud:baseRkud};
 })();

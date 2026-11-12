@@ -22,7 +22,7 @@
     try{const raw=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(raw&&raw.version===seed.version&&Array.isArray(raw.cases)&&Array.isArray(raw.rkud)){
       raw.audit=Array.isArray(raw.audit)?raw.audit:[];
       raw.cases=raw.cases.filter(x=>x&&typeof x.id==='string'&&['A','B'].includes(x.lane)).map(x=>({...x,notes:Array.isArray(x.notes)?x.notes:[]}));
-      for(const entry of raw.cases){const original=seed.cases.find(x=>x.id===entry.id);if(!entry.impact&&original?.impact)entry.impact=original.impact;}
+      for(const entry of raw.cases){const original=seed.cases.find(x=>x.id===entry.id);if(!entry.impact&&original?.impact)entry.impact=original.impact;if(original&&!entry.notes.length&&entry.recommendation==='Lakukan klarifikasi dokumen kepada pengampu dan catat respons.')entry.recommendation=original.recommendation;}
       const old=raw.cases.find(x=>x.id==='BALI-RKUD-2026-023'&&x.title==='Konfirmasi penerimaan rekap RKUD Kota Denpasar'&&!x.notes.length);
       if(old){const corrected=seed.cases.find(x=>x.id===old.id);Object.assign(old,{title:corrected.title,evidence:corrected.evidence,context:corrected.context});}
       return raw;
@@ -32,7 +32,7 @@
   let state=loadState(),currentTab='peringatan',returnFocus=null,modalBackground=[],popupBackground=[],popupReturnFocus=null;
   function toast(message){$('tkd-toast').textContent=message;$('tkd-toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('tkd-toast').hidden=true,3500);}
   function persist(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch{toast('Perubahan tersedia pada sesi ini; penyimpanan browser tidak tersedia.');return false;}}
-  function logChange(action,ref,note){state.audit.push({time:clockWIB(),occurredAt:nowWIB(),actor:profile().name,role:profile().label,action,ref,note:String(note||'')});persist();}
+  function logChange(action,ref,note){state.audit.push({time:clockWIB(),occurredAt:nowWIB(),actor:profile().name,role:profile().label,action,ref,note:String(note||'')});return persist();}
     const USER_PROFILES={
     KPPN:{name:'Ni Putu Wulandari',label:'Petugas KPPN',home:'peringatan',focus:'Periksa masalah dan catat pelaksanaan',scope:'Penyaluran TKD pada KPPN Denpasar. Keputusan penugasan dan penutupan diajukan kepada Kepala KPPN.',powers:'Mencatat masalah, mengonfirmasi fakta, meminta kelengkapan data, mencatat tindakan, serta mengusulkan penutupan atau meminta arahan Kepala KPPN.'},
     KepalaKPPN:{name:'I Made Pranata',label:'Kepala KPPN',home:'ikhtisar',focus:'Tetapkan keputusan dan awasi penyelesaian',scope:'Keputusan penyaluran TKD KPPN Denpasar: penugasan, arahan dan persetujuan penutupan. Data RKUD tetap dikelola PKN.',powers:'Menugaskan pemeriksaan, menetapkan PIC dan target, mengarahkan tindak lanjut, meneruskan hambatan ke Kanwil, serta menyetujui atau mengembalikan usulan penutupan.'},
@@ -47,7 +47,7 @@
 
   const earlyStage=x=>['Sinyal','Pemantauan','Perlu konfirmasi data'].includes(x.stage);
   const roleScope=()=>state.cases.filter(x=>isKppn()?x.lane==='A':$('tkd-role').value==='PKN'?x.lane==='B':true);
-  const alertSignature=()=>workForRole().map(x=>[x.id,x.stage,x.deadline||'',x.notes?.length||0].join(':')).sort().join('|');
+  const alertSignature=()=>workForRole().map(x=>[x.id,x.stage,x.deadline||'',x.severity,x.notes?.length||0].join(':')).sort().join('|');
   const dismissed=()=>{try{return sessionStorage.getItem('myintress.tkd.dismiss.'+$('tkd-role').value)===alertSignature();}catch{return false;}};
   const canReadCase=x=>!!x&&(isKppn()?x.lane==='A':$('tkd-role').value==='PKN'?x.lane==='B':true);
   const sourceScope=()=>isKppn()?[]:state.rkud.filter(x=>x.region==='Bali');
@@ -79,12 +79,31 @@
   });}
   const actionLabels={assignReview:'Tugaskan pemeriksaan',approve:'Setujui penutupan',returnWork:'Kembalikan untuk perbaikan',respond:'Catat arahan / respons',confirm:'Konfirmasi masalah',wait:'Minta konfirmasi data',reject:'Usulkan tidak relevan',plan:'Tetapkan tindak lanjut',progress:'Catat perkembangan',escalate:'Minta dukungan',finish:'Ajukan penutupan'};
   const labelForAction=(action,x)=>action==='finish'&&x.lane==='B'?'Selesaikan isu data':action==='reject'&&x.lane==='B'?'Tutup: tidak relevan':action==='plan'&&x.stage==='Eskalasi'?'Beri arahan tindak lanjut':actionLabels[action];
+  function handoff(x){
+    if(x.stage==='Selesai')return {role:null,recipient:'Tidak ada — penanganan ditutup',waiting:'Hasil dan bukti tersimpan di riwayat. Status penyaluran dan belanja tetap mengikuti data sumber.'};
+    const role=x.stage==='Menunggu persetujuan'?'KepalaKPPN':x.stage==='Eskalasi'?(x.lane==='B'?dataRecipient(x):x.escalationTarget==='Kanwil DJPb'?'Kanwil':'KepalaKPPN'):x.lane==='A'?(x.stage==='Terverifikasi'?'KepalaKPPN':'KPPN'):earlyOwner(x);
+    const p=USER_PROFILES[role],unit=['KPPN','KepalaKPPN'].includes(role)?'KPPN Denpasar':role==='Kanwil'?'Kanwil DJPb Provinsi Bali':'Direktorat PKN';
+    const waiting=x.stage==='Menunggu persetujuan'?'Pemeriksaan hasil dan bukti, lalu persetujuan atau pengembalian usulan.':x.stage==='Eskalasi'?'Arahan atau respons dukungan. Kasus tetap menjadi tanggung jawab unit pemilik.':earlyStage(x)?(x.stage==='Perlu konfirmasi data'?'Kelengkapan data dan pemeriksaan ulang.':'Pemeriksaan fakta dan konfirmasi masalah.'):x.stage==='Terverifikasi'?'Penetapan PIC, target, dan tindakan yang disepakati.':x.stage==='Ditugaskan'?'Pelaksanaan rencana dan pencatatan respons.':'Perkembangan penanganan dan bukti hasil untuk usulan penyelesaian.';
+    return {role,recipient:p.label+' · '+unit+' · '+(role==='KPPN'?(x.owner||p.name):p.name),waiting};
+  }
+  function showOutcome({title,ref,recipient,waiting,deadline,caseId,stored=true}){
+    const box=$('tkd-outcome');box.dataset.role=$('tkd-role').value;box.hidden=false;
+    box.innerHTML='<div class="tkd-outcome-head"><h2>'+esc(title)+'</h2><button type="button" class="tkd-text-button" data-dismiss-outcome aria-label="Tutup hasil tindakan">Tutup ×</button></div><p class="tkd-record-id">'+esc(ref)+'</p><dl><div><dt>Penanggung jawab berikutnya</dt><dd>'+esc(recipient)+'</dd></div><div><dt>Menunggu</dt><dd>'+esc(waiting)+'</dd></div>'+(deadline?'<div><dt>Target peninjauan</dt><dd>'+esc(showDate(deadline))+'</dd></div>':'')+'</dl>'+(caseId?'<button type="button" class="tkd-text-button" data-tkd-case="'+esc(caseId)+'">Lihat kasus & riwayat</button>':'');
+    if(!stored){box.querySelector('h2').textContent='Perubahan hanya tersedia pada sesi ini';box.insertAdjacentHTML('beforeend','<p class="tkd-subtle">Penyimpanan browser gagal. Perubahan dapat hilang saat halaman dimuat ulang.</p>');}
+    $('tkd-live-status').textContent=(stored?title:'Penyimpanan browser gagal')+'. '+recipient+'. '+waiting;box.focus();$('tkd-popup-content').scrollTop=0;
+  }
+  function caseOutcome(x,stored=true){const f=handoff(x);showOutcome({title:x.stage==='Selesai'?'Penanganan kasus ditutup':'Tindakan tersimpan',ref:x.id,recipient:f.recipient,waiting:f.waiting,deadline:x.stage==='Selesai'?null:x.deadline,caseId:x.id,stored});}
+  const caseInstruction=x=>x.nextInstruction||x.regionalResponse||x.recommendation||'';
+  const briefInstruction=x=>{const s=caseInstruction(x);return s.length>180?s.slice(0,177)+'…':s;};
   function nextCaseAction(x){
     if(x.stage==='Selesai')return 'Hasil dan bukti tersedia pada riwayat kasus.';
     if(x.stage==='Menunggu persetujuan')return $('tkd-role').value==='KepalaKPPN'?'Periksa hasil dan bukti, lalu setujui atau kembalikan usulan.':'Menunggu Kepala KPPN memeriksa usulan penutupan.';
     if(x.stage==='Eskalasi')return caseActions(x).includes('respond')?'Catat arahan agar unit pemilik dapat melanjutkan penanganan.':'Menunggu dukungan '+x.escalationTarget+'.';
-    if(earlyStage(x))return x.lane==='A'?'Konfirmasi persyaratan dan catat hasil pemeriksaan.':'Konfirmasi periode, kelengkapan dan izin sumber.';
+    if(!caseActions(x).length){const f=handoff(x);return 'Menunggu '+f.recipient+'. '+f.waiting;}
+    if(caseActions(x)[0]==='assignReview')return 'Tetapkan petugas dan target pemeriksaan fakta.';
+    if(earlyStage(x))return x.nextInstruction?briefInstruction(x):x.lane==='A'?'Konfirmasi persyaratan dan catat hasil pemeriksaan.':'Konfirmasi periode, kelengkapan dan izin sumber.';
     if(x.stage==='Terverifikasi')return x.lane==='A'&&$('tkd-role').value!=='KepalaKPPN'?'Menunggu Kepala KPPN menetapkan PIC dan target.':'Tetapkan PIC, target dan rencana yang dapat ditindaklanjuti.';
+    if(['Ditugaskan','Ditindaklanjuti'].includes(x.stage)&&caseInstruction(x))return briefInstruction(x);
     return 'Catat tindakan dan respons; ajukan penyelesaian setelah bukti tersedia.';
   }
   const statusMatch=(x,status)=>status==='all'||status==='review'&&earlyStage(x)||status==='plan'&&x.stage==='Terverifikasi'||status==='progress'&&['Ditugaskan','Ditindaklanjuti'].includes(x.stage)||status==='approval'&&x.stage==='Menunggu persetujuan'||status==='support'&&x.stage==='Eskalasi'||status==='overdue'&&overdue(x)||status==='done'&&x.stage==='Selesai';
@@ -95,16 +114,18 @@
     if(x.stage==='Selesai')return {rank:9,label:'Selesai',tone:'low'};
     if(d!==null&&d<0)return {rank:0,label:'Terlambat '+Math.abs(d)+' hari',tone:'high'};
     if(d===0)return {rank:1,label:'Target hari ini',tone:'high'};
-    if(x.stage==='Menunggu persetujuan')return {rank:2,label:'Perlu persetujuan',tone:'medium'};
     if(d!==null&&d<=3)return {rank:2,label:'Target '+d+' hari lagi',tone:'medium'};
-    if(!x.deadline)return {rank:3,label:'Target belum ditetapkan',tone:'pending'};
-    return {rank:x.severity==='tinggi'?3:4,label:'Target '+showDate(x.deadline),tone:'pending'};
+    if(x.severity==='tinggi')return {rank:3,label:'Dampak tinggi · '+(x.deadline?'target '+showDate(x.deadline):'perlu target'),tone:'high'};
+    if(x.stage==='Menunggu persetujuan')return {rank:3,label:'Perlu persetujuan',tone:'medium'};
+    if(!x.deadline)return {rank:4,label:'Target belum ditetapkan',tone:'pending'};
+    return {rank:5,label:'Target '+showDate(x.deadline),tone:'pending'};
   }
-  const ordered=rows=>rows.slice().sort((a,b)=>priority(a).rank-priority(b).rank||(a.deadline||'9999').localeCompare(b.deadline||'9999')||a.id.localeCompare(b.id));
+  const impactWeight=x=>({'tinggi':0,'sedang':1,'rendah':2}[x.severity]??1);
+  const ordered=rows=>rows.slice().sort((a,b)=>priority(a).rank-priority(b).rank||impactWeight(a)-impactWeight(b)||(a.deadline||'9999').localeCompare(b.deadline||'9999')||a.id.localeCompare(b.id));
   const impact=x=>x.impact||(x.lane==='B'?'Analisis APBD berpotensi menggunakan informasi kas yang belum lengkap.':x.dimension==='D3'?'Hambatan kegiatan berpotensi memengaruhi penyelesaian tahapan penyaluran.':'Kelengkapan persyaratan berpotensi menunda proses penyaluran TKD.');
   function workCard(x){
     const p=priority(x),actions=caseActions(x),primary=actions[0];
-    return '<article class="tkd-work-card" data-case-record="'+esc(x.id)+'"><div class="tkd-work-main"><div class="tkd-inline-tags"><span class="tkd-tag">'+(x.lane==='A'?'Penyaluran TKD':'Informasi RKUD')+'</span><span class="tkd-tag tkd-'+p.tone+'">'+esc(p.label)+'</span></div><h3>'+esc(x.title)+'</h3><p class="tkd-facts">'+esc(x.evidence)+'</p><p class="tkd-impact"><b>'+(x.stage==='Selesai'?'Hasil:':'Potensi dampak:')+'</b> '+esc(x.stage==='Selesai'?x.result:impact(x))+'</p><p class="tkd-work-next"><b>Berikutnya:</b> '+esc(nextCaseAction(x))+'</p><p class="tkd-record-id">'+esc(x.id)+' · '+esc(stageLabel(x))+'</p></div><div class="tkd-work-side"><p><b>PIC</b><span>'+esc(x.owner||'Belum ditetapkan')+'</span></p><p><b>Target tindak lanjut</b><span>'+esc(x.deadline?showDate(x.deadline):'Belum ditetapkan')+'</span></p>'+(primary?'<button type="button" class="tkd-button" data-case-action="'+primary+'" data-case-id="'+esc(x.id)+'">'+esc(labelForAction(primary,x))+'</button>':'')+'<button type="button" class="tkd-text-button" data-tkd-case="'+esc(x.id)+'">'+(x.stage==='Selesai'?'Hasil & riwayat':'Rincian & tindakan lain')+'</button></div></article>';
+    return '<article class="tkd-work-card" data-case-record="'+esc(x.id)+'"><div class="tkd-work-main"><div class="tkd-inline-tags"><span class="tkd-tag">'+(x.lane==='A'?'Penyaluran TKD':'Informasi RKUD')+'</span><span class="tkd-tag tkd-'+p.tone+'">'+esc(p.label)+'</span></div><h3>'+esc(x.title)+'</h3><p class="tkd-location">'+esc([x.locality||x.region,x.transfer].filter(Boolean).join(' · '))+'</p><p class="tkd-impact"><b>'+(x.stage==='Selesai'?'Hasil:':'Dampak'+(x.severity==='tinggi'?' tinggi':'')+':')+'</b> '+esc(x.stage==='Selesai'?x.result:impact(x))+'</p><p class="tkd-work-next"><b>Berikutnya:</b> '+esc(nextCaseAction(x))+'</p><details class="tkd-source"><summary>Fakta & sumber</summary><p class="tkd-facts">'+esc(x.evidence)+'</p><p>'+esc(x.source)+'</p></details><p class="tkd-record-id">'+esc(x.id)+' · '+esc(stageLabel(x))+'</p></div><div class="tkd-work-side"><p><b>PIC</b><span>'+esc(x.owner||'Belum ditetapkan')+'</span></p><p><b>Target tindak lanjut</b><span>'+esc(x.deadline?showDate(x.deadline):'Belum ditetapkan')+'</span></p>'+(primary?'<button type="button" class="tkd-button" data-case-action="'+primary+'" data-case-id="'+esc(x.id)+'">'+esc(labelForAction(primary,x))+'</button>':'')+'<button type="button" class="tkd-text-button" data-tkd-case="'+esc(x.id)+'">'+(x.stage==='Selesai'?'Hasil & riwayat':'Rincian & tindakan lain')+'</button></div></article>';
   }
   function rkudIssues(x){
     const issues=[];
@@ -139,7 +160,7 @@
   function renderWork(){
     const all=workForRole(),rows=ordered(all.filter(matches));
     $('tkd-task-count').textContent=String(all.length);
-    $('tkd-work-summary').textContent=rows.length===all.length?all.length+' pekerjaan, diurutkan menurut target dan kebutuhan keputusan.':rows.length+' dari '+all.length+' pekerjaan cocok dengan filter.';
+    $('tkd-work-summary').textContent=rows.length===all.length?all.length+' pekerjaan · urutan tenggat dan dampak.':rows.length+' dari '+all.length+' pekerjaan cocok dengan filter.';
     $('tkd-inbox-cases').innerHTML=currentTab==='peringatan'&&!$('tkd-page').hidden?(rows.map(workCard).join('')||emptyMessage(all.length?'Tidak ada pekerjaan yang cocok dengan filter.':'Tidak ada tindakan yang menunggu pengguna ini. Riwayat tersedia di Semua kasus.')):'';
     const missing=sourceScope().filter(x=>!rkudReady(x)).length;
     $('tkd-data-attention').hidden=isKppn()||missing===0;
@@ -148,7 +169,7 @@
     $('tkd-cases-all').innerHTML=currentTab==='register'&&!$('tkd-page').hidden?(ordered(visibleCases()).map(workCard).join('')||emptyMessage('Tidak ada kasus yang cocok dengan filter.')):'';
     const active=workForRole().length;$('tkd-home-count').textContent=active+' Perlu Tindakan';$('tkd-home-summary').textContent=active?'Ada '+active+' pekerjaan untuk '+profile().label+'. Lihat pemicu, PIC dan langkah berikutnya.':'Tidak ada pekerjaan yang menunggu Anda. Riwayat tetap tersedia di modul TKD.';
     $('ews-alert').hidden=active===0||dismissed();
-    const bell=document.querySelector('.ews-bell');bell.classList.toggle('has-alerts',active>0);bell.classList.toggle('is-urgent',workForRole().some(x=>priority(x).rank<=1));bell.setAttribute('aria-label','Peringatan TKD: '+active+' pekerjaan untuk '+profile().label);
+    const bell=document.querySelector('.ews-bell');bell.classList.toggle('has-alerts',active>0);bell.classList.toggle('is-urgent',workForRole().some(x=>priority(x).tone==='high'));bell.setAttribute('aria-label','Peringatan TKD: '+active+' pekerjaan untuk '+profile().label);
     $('tkd-live-status').textContent=rows.length+' pekerjaan ditampilkan.';
   }
   function renderSummary(){
@@ -181,7 +202,7 @@
     if($('tkd-page').hidden){popupReturnFocus=trigger||document.querySelector('.ews-bell');popupBackground=[document.querySelector('.site-header'),document.querySelector('.dashboard-main'),document.querySelector('.site-footer')].map(x=>[x,x.inert]);popupBackground.forEach(([x])=>x.inert=true);$('tkd-page').hidden=false;document.body.style.overflow='hidden';}
     document.querySelectorAll('[data-tkd-open]').forEach(x=>x.setAttribute('aria-expanded','true'));renderAll();
   }
-  function close(){closeDialog();if($('tkd-page').hidden)return;$('tkd-page').hidden=true;popupBackground.forEach(([x,was])=>x.inert=was);popupBackground=[];document.body.style.overflow='';document.querySelectorAll('[data-tkd-open]').forEach(x=>x.setAttribute('aria-expanded','false'));history.replaceState(null,'',location.pathname+location.search);if(popupReturnFocus?.isConnected&&popupReturnFocus.getClientRects().length)popupReturnFocus.focus();else document.querySelector('.ews-bell').focus();}
+  function close(){closeDialog();$('tkd-outcome').hidden=true;if($('tkd-page').hidden)return;$('tkd-page').hidden=true;popupBackground.forEach(([x,was])=>x.inert=was);popupBackground=[];document.body.style.overflow='';document.querySelectorAll('[data-tkd-open]').forEach(x=>x.setAttribute('aria-expanded','false'));history.replaceState(null,'',location.pathname+location.search);if(popupReturnFocus?.isConnected&&popupReturnFocus.getClientRects().length)popupReturnFocus.focus();else document.querySelector('.ews-bell').focus();}
   function openDialog(title,subtitle,content){
     if($('tkd-dialog').hidden){returnFocus=document.activeElement;modalBackground=[document.querySelector('.site-header'),$('tkd-page'),document.querySelector('.dashboard-main'),document.querySelector('.site-footer')].map(x=>[x,x.inert]);modalBackground.forEach(([x])=>x.inert=true);}
     $('tkd-dialog-title').textContent=title;$('tkd-dialog-subtitle').textContent=subtitle;$('tkd-dialog-content').innerHTML=content;$('tkd-dialog').hidden=false;document.body.style.overflow='hidden';document.querySelector('.tkd-dialog').scrollTop=0;$('tkd-dialog-close').focus();
@@ -199,7 +220,9 @@
     const actions=caseActions(x);
     const history=(x.notes||[]).slice().reverse().map(n=>'<div><b>'+esc(n.time)+' · '+esc(n.stage)+'</b><br>'+esc(n.note)+'</div>').join('')||'<p class="tkd-subtle">Belum ada catatan penanganan.</p>';
     const html='<div class="tkd-inline-tags"><span class="tkd-tag '+stageColor(x.stage)+'">'+esc(stageLabel(x))+'</span><span class="tkd-tag tkd-pending">'+esc(x.region)+' · '+(x.lane==='A'?'Penyaluran TKD':'Informasi RKUD')+'</span></div><p class="tkd-case-intro">'+esc(x.evidence)+'</p><div class="tkd-choice-note"><b>Langkah berikutnya</b><p>'+esc(nextCaseAction(x))+'</p></div><div class="tkd-case-ownership"><p><b>PIC</b><br>'+esc(x.owner||'Belum ditetapkan')+'</p><p><b>Target</b><br>'+esc(x.deadline||'Belum ditetapkan')+'</p></div>'+(x.stage==='Menunggu persetujuan'?'<div class="tkd-data-guard"><b>Usulan petugas · '+esc(x.proposedOutcome||'Penutupan')+'</b><p>'+esc(x.proposedResult||'')+'</p><p>Bukti: '+esc(x.proposedEvidence||'')+'</p><p>Diajukan oleh '+esc(x.proposedBy||'petugas')+'</p></div>':'')+(x.stage==='Selesai'?'<div class="tkd-data-guard"><b>Hasil</b><p>'+esc(x.result)+'</p><p>Bukti: '+esc(x.evidenceRef||'—')+'</p></div>':'')+'<div class="tkd-action-choices">'+actions.map((a,i)=>'<button type="button" class="tkd-button '+(i?'tkd-outline':'')+'" data-case-action="'+a+'" data-case-id="'+esc(x.id)+'">'+labelForAction(a,x)+'</button>').join('')+'</div>'+(!actions.length&&x.stage!=='Selesai'?'<p class="tkd-subtle">Penanganan dilakukan oleh '+(x.lane==='A'?'KPPN/Kanwil':'PKN/Kanwil')+'. Sudut pandang ini hanya untuk membaca.</p>':'')+'<details class="tkd-source"><summary>Sumber, kronologi &amp; riwayat</summary><p>'+esc(x.source)+' · '+esc(x.origin)+' · '+esc(x.dimension)+'</p><p>'+esc(x.context||'')+'</p>'+[['Sinyal dicatat',x.detectedAt],['Diverifikasi',x.verifiedAt],['Ditugaskan',x.assignedAt],['Tindakan pertama',x.actedAt],['Ditutup',x.closedAt]].filter(a=>a[1]).map(a=>'<p>'+a[0]+': '+esc(a[1].replace('T',' '))+' WIB</p>').join('')+'<div class="tkd-audit-log">'+history+'</div></details>';
-    openDialog(x.title,'Pilih tindakan berikutnya untuk melanjutkan penanganan kasus.',html);
+    const flow=handoff(x),instruction=caseInstruction(x);
+    const fiscal='<section class="tkd-fiscal-context" aria-label="Status penyaluran, belanja dan penanganan"><h3>Konteks APBD</h3><dl><div><dt>Penyaluran TKD</dt><dd>Belum dikonfirmasi dari data penyaluran</dd></div><div><dt>Belanja APBD</dt><dd>Belum tersedia pada sumber kasus ini</dd></div><div><dt>Penanganan masalah</dt><dd>'+esc(stageLabel(x))+'</dd></div></dl><p>Penutupan kasus menunjukkan hasil penanganan, bukan bukti dana sudah disalurkan atau dibelanjakan. Saldo RKUD perlu ditelaah bersama laporan realisasi APBD.</p></section>';
+    openDialog(x.title,'Pilih tindakan berikutnya untuk melanjutkan penanganan kasus.','<p class="tkd-case-location">'+esc([x.locality||x.region,x.transfer].filter(Boolean).join(' · '))+'</p><p class="tkd-case-intro"><b>Dampak:</b> '+esc(impact(x))+'</p>'+html+(instruction&&x.stage!=='Selesai'?'<section class="tkd-handoff"><h3>Arahan tindak lanjut</h3><p>'+esc(instruction)+'</p></section>':'')+'<section class="tkd-handoff"><h3>Penanggung jawab berikutnya</h3><p>'+esc(flow.recipient)+'</p><p><b>Menunggu:</b> '+esc(flow.waiting)+'</p></section>'+fiscal);
   }
   function escalationTargets(x){
     if(x.lane==='A')return $('tkd-role').value==='KPPN'?['Kepala KPPN']:['Kanwil DJPb'];
@@ -261,9 +284,11 @@
     if(action==='approve'){x.stage='Selesai';x.closedAt=t;x.result=x.proposedResult;x.evidenceRef=x.proposedEvidence;x.approvedBy=profile().name;x.approvedAt=t;}
     if(action==='returnWork'){x.stage=x.reviewFromStage||'Perlu konfirmasi data';x.deadline=v.deadline;if(x.proposedOutcome==='Tidak relevan'){x.signalQuality='Belum dinilai';if(earlyStage(x))x.verifiedAt='';}x.returnedAt=t;x.proposedAt='';x.proposedResult='';x.proposedEvidence='';}
     if(action==='respond'){x.stage=x.stageBeforeEscalation||'Ditugaskan';x.deadline=v.deadline;x.regionalResponse=v.note;x.regionalRespondedAt=t;if(x.lane==='B')x.responsibleRole=x.escalatedByRole||($('tkd-role').value==='Kanwil'?'PKN':'Kanwil');}
+    if(['plan','respond','returnWork','assignReview'].includes(action))x.nextInstruction=v.recommendation||v.note;
+    if(action==='confirm')x.nextInstruction='';
     const note=v.note||v.recommendation||v.escalationReason||v.result;
     x.notes=x.notes||[];x.notes.push({time:clockWIB(),occurredAt:t,actor:profile().name,actorRole:$('tkd-role').value,action,stage:x.stage,note:labelForAction(action,x)+' · '+v.decider+': '+note+(v.evidenceRef?' · Bukti: '+v.evidenceRef:'')});
-    logChange(labelForAction(action,x)+' · '+before+' → '+x.stage,x.id,note);closeDialog();renderAll();(currentTab==='peringatan'?$('tkd-inbox-title'):$('tkd-tab-'+currentTab)).focus();toast('Tindakan tersimpan. '+(x.stage==='Selesai'?'Kasus dipindahkan ke riwayat.':'Langkah berikutnya sudah diperbarui.'));
+    const stored=logChange(labelForAction(action,x)+' · '+before+' → '+x.stage,x.id,note);closeDialog();renderAll();caseOutcome(x,stored);
   }
 
   function openRkud(id=null){
@@ -305,7 +330,7 @@
       if(duplicate){openCase(duplicate.id);toast('Kasus sudah tercatat. Tambahkan perkembangan pada kasus yang sama.');return;}
       const id=(v.lane==='A'?'DPS-TKD-':'BALI-RKUD-')+todayWIB().slice(0,4)+'-'+crypto.randomUUID().slice(0,8).toUpperCase();
       state.cases.unshift({id,region:v.region,locality:'Kota Denpasar',lane:v.lane,dimension:v.lane==='A'?'D1':'D4a',transfer,title:v.title,evidence:v.evidence,source:v.source,origin:'Pencatatan petugas',context:'',severity:'sedang',stage:'Sinyal',owner:'',deadline:'',result:'',notes:[],updatedAt:clockWIB(),detectedAt:v.detectedAt,firstKnownAt:'',verifiedAt:'',actedAt:'',closedAt:'',decider:profile().name,evidenceRef:'',signalQuality:'Belum dinilai',responsibleRole:$('tkd-role').value});
-      logChange('Catat masalah',id,v.title);closeDialog();clearFilters();switchTab('peringatan');toast('Kasus '+id+' dicatat dan masuk antrean pemeriksaan.');return;
+      const stored=logChange('Catat masalah',id,v.title);closeDialog();clearFilters();switchTab('peringatan');caseOutcome(state.cases[0],stored);return;
     }
     if(form.id==='tkd-rkud-form'){
       if((!canEditSource()&&!canEditAnalysis())||form.dataset.role!==$('tkd-role').value){formError(form,'Pengguna berubah atau tidak memiliki kewenangan untuk formulir ini.');return;}
@@ -318,13 +343,15 @@
       const error=validateMetadata(rec,{analyst:canEditAnalysis()});if(error){formError(form,error);return;}
       if(state.rkud.some(x=>x.id!==rec.id&&recordKey(x)===recordKey(rec))){formError(form,'Objek, bank dan periode tersebut sudah memiliki rekap. Perbarui rekap yang tersedia.');return;}
       const i=state.rkud.findIndex(x=>x.id===rec.id);if(i<0)state.rkud.push(rec);else state.rkud[i]=rec;
-      logChange('Perbarui metadata '+profile().label,rec.id,rec.pemda+'; '+rec.validation+'; '+rec.permission);closeDialog();renderAll();toast('Metadata sumber dan jejak distribusi berhasil diperbarui.');return;
+      const stored=logChange('Perbarui metadata '+profile().label,rec.id,rec.pemda+'; '+rec.validation+'; '+rec.permission);closeDialog();renderAll();
+      const needsSource=!sourceReady(rec),needsReview=rec.analysisNeedsReview;
+      showOutcome({title:'Informasi RKUD diperbarui',ref:rec.id,recipient:needsSource?'Pengampu PKN · Direktorat PKN':needsReview||!rec.kanwilAt||!rec.alcoAt?'Analis Kanwil · Kanwil DJPb Provinsi Bali':'Tidak ada — jejak pemanfaatan sudah tercatat',waiting:needsSource?'Lengkapi '+rkudIssues(rec).filter(x=>!['Penerimaan Kanwil','Konfirmasi ulang Kanwil'].includes(x)).join(', ')+'.':needsReview?'Peninjauan ulang Kanwil atas perubahan sumber PKN.':!rec.kanwilAt?'Pencatatan penerimaan rekap oleh Kanwil.':!rec.alcoAt?'Telaah rekap dan pencatatan pemanfaatan untuk ALCo.':'Kasus isu data tetap perlu diselesaikan dengan bukti pada register kasus.',stored});return;
     }
   }
   const quoteCSV=value=>{const s=String(value??''),safe=/^\s*[=+\-@]/.test(s)?"'"+s:s;return '"'+safe.replace(/"/g,'""')+'"';};
   const toCSV=(rows,cols)=>[cols.join(','),...rows.map(x=>cols.map(k=>quoteCSV(x[k]??'')).join(','))].join('\r\n');
   function downloadText(name,text){const blob=new Blob(['\ufeff',text],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);document.querySelectorAll('.tkd-download').forEach(x=>x.open=false);}
-  function exportCases(){const cols=['id','region','locality','lane','dimension','transfer','title','severity','stage','source','evidence','owner','deadline','recommendation','result','detectedAt','verifiedAt','assignedAt','actedAt','proposedAt','proposedBy','proposedResult','proposedEvidence','closedAt','approvedBy','decider','evidenceRef','escalationTarget','escalationReason','regionalResponse'];downloadText('register_ews_tkd_denpasar.csv',toCSV(visibleCases(),cols));}
+  function exportCases(){const cols=['id','region','locality','lane','dimension','transfer','title','severity','impact','stage','source','evidence','owner','responsibleRole','deadline','recommendation','nextInstruction','result','detectedAt','verifiedAt','assignedAt','actedAt','proposedAt','proposedBy','proposedResult','proposedEvidence','closedAt','approvedBy','decider','evidenceRef','escalationTarget','escalationReason','regionalResponse'];downloadText('register_ews_tkd_denpasar.csv',toCSV(visibleCases(),cols));}
   function exportAudit(){const ids=new Set([...roleScope(),...sourceScope()].map(x=>x.id));downloadText('jejak_tindakan_tkd.csv',toCSV(state.audit.filter(x=>ids.has(x.ref)||!isKppn()&&x.ref==='RKUD'),['occurredAt','actor','role','action','ref','note']));}
   function exportRkud(){downloadText('metadata_rkud_bali.csv',toCSV(filteredRkud(),csvFields));}
   function downloadTemplate(){downloadText('template_metadata_rkud_bali.csv',toCSV([seed.rkud[0]],csvFields));}
@@ -365,8 +392,8 @@
         if(old&&sourceChanged(old,rec)&&(old.kanwilAt||old.alcoAt))rec.analysisNeedsReview=true;
         if(!old){next.push(rec);counts.added++;}else if(JSON.stringify(old)===JSON.stringify(rec)){counts.unchanged++;}else{next[found]=rec;counts.updated++;}
       }
-      state.rkud=next;if(counts.added||counts.updated)logChange('Impor sumber RKUD','RKUD',counts.added+' baru; '+counts.updated+' diperbarui; '+counts.unchanged+' tidak berubah');
-      renderAll();toast('Impor selesai: '+counts.added+' rekap baru, '+counts.updated+' diperbarui, '+counts.unchanged+' tidak berubah. Tidak ada penambahan ganda.');
+      state.rkud=next;const stored=counts.added||counts.updated?logChange('Impor sumber RKUD','RKUD',counts.added+' baru; '+counts.updated+' diperbarui; '+counts.unchanged+' tidak berubah'):true;
+      $('tkd-outcome').hidden=true;renderAll();toast((stored?'Impor selesai: ':'Impor hanya tersedia pada sesi ini; penyimpanan browser gagal. ')+counts.added+' rekap baru, '+counts.updated+' diperbarui, '+counts.unchanged+' tidak berubah. Tidak ada penambahan ganda.');
     }catch(error){toast('Impor ditolak: '+error.message);}
   }
 
@@ -379,8 +406,9 @@
     document.querySelector('.tkd-tabs').addEventListener('keydown',e=>{const buttons=[...document.querySelectorAll('[data-tkd-tab]')],i=buttons.indexOf(e.target);const next=e.key==='ArrowRight'?(i+1)%3:e.key==='ArrowLeft'?(i+2)%3:e.key==='Home'?0:e.key==='End'?2:null;if(i<0||next===null)return;e.preventDefault();switchTab(buttons[next].dataset.tkdTab);buttons[next].focus();});
     $('tkd-filters').addEventListener('submit',e=>e.preventDefault());
     $('tkd-search').addEventListener('input',renderAll);$('tkd-kind').addEventListener('change',renderAll);$('tkd-status').addEventListener('change',renderAll);$('tkd-clear-filters').addEventListener('click',clearFilters);
-    $('tkd-role').addEventListener('change',()=>{const wasOpen=!$('tkd-page').hidden;closeDialog();clearFilters();try{localStorage.setItem('myintress.tkd.mockUser',$('tkd-role').value);}catch{}renderAll();if(wasOpen)switchTab('peringatan');$('profile-menu').open=false;document.querySelector('#profile-menu>summary').focus();});
+    $('tkd-role').addEventListener('change',()=>{const wasOpen=!$('tkd-page').hidden;closeDialog();$('tkd-outcome').hidden=true;clearFilters();try{localStorage.setItem('myintress.tkd.mockUser',$('tkd-role').value);}catch{}renderAll();if(wasOpen)switchTab('peringatan');$('profile-menu').open=false;document.querySelector('#profile-menu>summary').focus();});
     document.addEventListener('click',e=>{
+      if(e.target.closest('[data-dismiss-outcome]')){$('tkd-outcome').hidden=true;(currentTab==='rkud'?$('tkd-rkud-title'):$('tkd-tab-'+currentTab)).focus();return;}
       const user=e.target.closest('[data-user-role]');if(user){$('tkd-role').value=user.dataset.userRole;$('tkd-role').dispatchEvent(new Event('change'));return;}
       const action=e.target.closest('[data-case-action]');if(action){openCaseAction(action.dataset.caseId,action.dataset.caseAction);return;}
       const detail=e.target.closest('[data-tkd-case]');if(detail){openCase(detail.dataset.tkdCase);return;}
@@ -397,7 +425,7 @@
     $('tkd-export').addEventListener('click',exportCases);$('tkd-audit-export').addEventListener('click',exportAudit);$('tkd-rkud-export').addEventListener('click',exportRkud);$('tkd-rkud-template').addEventListener('click',downloadTemplate);
     $('tkd-rkud-file').addEventListener('change',async e=>{await importRkudFile(e.target.files[0]);e.target.value='';});
     $('ews-alert-dismiss').addEventListener('click',()=>{try{sessionStorage.setItem('myintress.tkd.dismiss.'+$('tkd-role').value,alertSignature());}catch{}$('ews-alert').hidden=true;document.querySelector('.ews-bell').focus();});
-    window.addEventListener('storage',e=>{if(e.key!==STORAGE_KEY)return;state=loadState();if(!$('tkd-dialog').hidden){closeDialog();toast('Data diperbarui. Buka kembali kasus sebelum melanjutkan.');}renderAll();});
+    window.addEventListener('storage',e=>{if(e.key!==STORAGE_KEY)return;state=loadState();$('tkd-outcome').hidden=true;if(!$('tkd-dialog').hidden){closeDialog();toast('Data diperbarui. Buka kembali kasus sebelum melanjutkan.');}renderAll();});
     window.addEventListener('hashchange',route);
   }
   function route(){if(!['#ews-tkd','#tkd','#ews-tkd-rkud','#ews-tkd-penyaluran','#ews-tkd-evaluasi'].includes(location.hash))return;launch();switchTab(location.hash==='#ews-tkd-rkud'?'rkud':'peringatan');}
