@@ -38,6 +38,7 @@ async function reset(){await ev(()=>{const seed=window.MYINTRESS_TKD_SEED;localS
  await call('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:path.join(temp,'downloads')});
  await call('Page.navigate',{url:serverUrl});await until(()=>ev(()=>document.readyState==='complete'&&!!window.MYINTRESS_TKD_SEED&&document.querySelector('#header-user-role').textContent==='Petugas KPPN'));await helpers();await reset();
  assert('No duplicate IDs',await ev(()=>{const a=[...document.querySelectorAll('[id]')].map(x=>x.id);return new Set(a).size===a.length;}));
+ assert('Accessibility dashboard heading stays hidden without CDN styles',await ev(()=>{const e=document.querySelector('.dashboard-main>h1'),r=e.getBoundingClientRect();return e.textContent==='Dasbor MyIntress'&&getComputedStyle(e).position==='absolute'&&r.width<=1&&r.height<=1;}));
  assert('Exactly four direct user choices, no user select',await ev(()=>document.querySelectorAll('[data-user-role]').length===4&&!document.querySelector('select#tkd-role')));
  assert('Exactly three EWS views; no retired FA or pilot menus',await ev(()=>document.querySelectorAll('.tkd-tabs [role=tab]').length===3&&!document.querySelector('#ews-modal,#tkd-view-pilot,#tkd-view-penyaluran')));
  assert('One Tematik entry',await ev(()=>[...document.querySelectorAll('.menu-group')].find(x=>x.querySelector('summary').textContent==='Tematik').querySelectorAll('[data-tkd-open]').length===1));

@@ -20,7 +20,7 @@ Jalankan `node tests/ews-e2e.cjs`. Laporan mencakup empat peran, alih tanggung j
 
 ### Hasil uji ulang fungsi
 
-- 139 dari 139 pemeriksaan otomatis lulus; tidak ada exception aplikasi yang tertangkap selama pengujian.
+- 140 dari 140 pemeriksaan otomatis lulus; tidak ada exception aplikasi yang tertangkap selama pengujian. Termasuk pemeriksaan bahwa judul aksesibilitas beranda tetap tersembunyi ketika stylesheet CDN tidak tersedia.
 - Empat peran diuji pada enam ukuran viewport (320–1440 px). Form tindakan masing-masing peran juga diperiksa pada 320, 390, dan 1366 px, termasuk keterjangkauan tombol simpan.
 - Pembaruan utama tetap dua klik tombol, di luar pengisian formulir. Filter pada 300 kasus tambahan tetap menghasilkan daftar yang benar.
 - Celah yang diperbaiki: petunjuk pada kasus baca saja kini menyebut peran yang bertanggung jawab; petunjuk Kepala KPPN sesuai tindakan penugasan; hasil tindakan lama dibersihkan setelah impor berhasil; ekspor register membawa dampak dan arahan terbaru.
