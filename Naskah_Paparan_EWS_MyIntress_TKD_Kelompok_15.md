@@ -1,17 +1,15 @@
-# NASKAH PAPARAN INOVASI
+# NASKAH PAPARAN INOVASI KEL. 15
 
 ## Penguatan *Early Warning System* MyIntress Berbasis Risiko Pengelolaan Transfer ke Daerah dan Dana Desa untuk Mendukung Peran TREFA
 
 > **Kelompok 15 · Pengembangan Talenta DJPb 2026**  
 > **Forum:** Paparan dan pengujian di hadapan pejabat Eselon II DJPb  
-> **Estimasi durasi:** ±12–15 menit · **Materi:** 8 slide  
-> **Gaya penyampaian:** Santun, analitis, berorientasi keputusan, dan tidak menggurui.
+> **Estimasi durasi:** ±12–15 menit · **Materi:** 7 slide  
 
 ---
 
-## Panduan singkat penyampaian
+## Estimasi waktu penyampaian
 
-Paparan ini dirancang sebagai **naskah lisan**, bukan teks untuk dibaca kata demi kata. Sampaikan argumen inti dengan tempo tenang. Berikan jeda singkat setelah menyebut **masalah strategis**, **nilai tambah inovasi**, dan **keputusan yang diharapkan**. Istilah teknis cukup dijelaskan saat pertama kali muncul.
 
 | Slide | Fokus | Alokasi waktu |
 |:---:|---|:---:|
@@ -22,23 +20,19 @@ Paparan ini dirancang sebagai **naskah lisan**, bukan teks untuk dibaca kata dem
 | 5 | Roadmap, risiko, dan ukuran keberhasilan | ±2,5 menit |
 | 6 | Manajemen perubahan (ADKAR) | ±1,5 menit |
 | 7 | Kesimpulan dan rekomendasi | ±2 menit |
-| 8 | Penutup | ±0,5 menit |
 
 ### Navigasi
 
-[Slide 1](#slide-1--pembukaan-dan-pengantar-inovasi) · [Slide 2](#slide-2--latar-belakang-masalah-dan-analisis-akar-masalah) · [Slide 3](#slide-3--dimensi-pemantauan-risiko-tkd) · [Slide 4](#slide-4--solusi-dan-arsitektur-kanal-ews-myintress) · [Slide 5](#slide-5--roadmap-uji-coba-dan-indikator-keberhasilan) · [Slide 6](#slide-6--change-management-strategi-adopsi-pengguna) · [Slide 7](#slide-7--kesimpulan-dan-rekomendasi-strategis) · [Slide 8](#slide-8--penutup)
+[Slide 1](#slide-1--pembukaan-dan-pengantar-inovasi) · [Slide 2](#slide-2--latar-belakang-masalah-dan-analisis-akar-masalah) · [Slide 3](#slide-3--dimensi-pemantauan-risiko-tkd) · [Slide 4](#slide-4--solusi-dan-arsitektur-kanal-ews-myintress) · [Slide 5](#slide-5--roadmap-uji-coba-dan-indikator-keberhasilan) · [Slide 6](#slide-6--change-management-strategi-adopsi-pengguna) · [Slide 7](#slide-7--kesimpulan-dan-rekomendasi-strategis)
 
 ---
 
 ## Slide 1 — Pembukaan dan Pengantar Inovasi
 
-**Pesan inti:** Inovasi bukan membangun EWS baru, melainkan memperkuat perannya dalam pengambilan keputusan.
 
-**Naskah paparan**
+Yang kami hormati Bapak Ka Kanwil / Direktur
 
-Yang kami hormati Bapak/Ibu Tim Penguji, serta Bapak/Ibu sekalian.
-
-Perkenankan kami dari Kelompok 15 menyampaikan gagasan inovasi yang berjudul **“Penguatan Early Warning System MyIntress Berbasis Risiko Pengelolaan Transfer ke Daerah dan Dana Desa untuk Mendukung Peran TREFA.”**
+Perkenankan kami dari Kelompok 15 yang terdiri atas: Mas Bella, Mas Iyan, Mas Angga, Pak Arief, Cak Gup dan Mas Irwan, menyampaikan gagasan inovasi yang berjudul **“Penguatan Early Warning System MyIntress Berbasis Risiko Pengelolaan Transfer ke Daerah dan Dana Desa untuk Mendukung Peran TREFA.”**
 
 Gagasan ini dilatarbelakangi oleh semakin strategisnya peran Direktorat Jenderal Perbendaharaan, tidak hanya dalam memastikan kelancaran pelaksanaan APBN, tetapi juga dalam menyediakan informasi fiskal yang berkualitas, memberikan rekomendasi, serta mendukung pengambilan keputusan para pemangku kepentingan.
 
@@ -54,11 +48,9 @@ Melalui pendekatan tersebut, kami berharap inovasi ini dapat memberikan kontribu
 
 ## Slide 2 — Latar Belakang Masalah dan Analisis Akar Masalah
 
-**Pesan inti:** Persoalan yang diuji adalah jarak antara data yang tersedia, peringatan yang relevan, dan tindakan yang tepat waktu.
 
-**Naskah paparan**
 
-Bapak/Ibu Tim Penguji yang kami hormati,
+Bapak Ka Kanwil / Direktur yang kami hormati,
 
 Dalam mengidentifikasi permasalahan, kami terlebih dahulu mencermati kondisi MyIntress saat ini dan membandingkannya dengan kebutuhan pengambilan keputusan dalam pengelolaan TKD.
 
@@ -84,17 +76,14 @@ Dari analisis tersebut, kami melihat bahwa penguatan EWS tidak dapat hanya menga
 
 Tentunya, dugaan akar masalah tersebut masih perlu divalidasi agar solusi yang dipilih benar-benar sesuai dengan kebutuhan organisasi.
 
-> **Penekanan saat berbicara:** Data ALCo adalah **bukti permasalahan dan dasar pengujian**, bukan bukti bahwa EWS MyIntress telah gagal. Fishbone adalah **hipotesis akar masalah**, bukan hasil audit final.
+
 
 ---
 
 ## Slide 3 — Dimensi Pemantauan Risiko TKD
 
-**Pesan inti:** Lima dimensi menjadi kerangka analitis, dengan prioritas dua jalur uji yang realistis.
 
-**Naskah paparan**
-
-Bapak/Ibu Tim Penguji,
+Bapak Ka Kanwil / Direktur,
 
 Berdasarkan permasalahan tersebut, kami mengusulkan kerangka pemantauan yang terdiri atas **lima dimensi risiko**, dengan dua jalur utama penerapan.
 
@@ -120,17 +109,15 @@ Dari kelima dimensi tersebut, kami menetapkan **D1 dan D2 sebagai prioritas awal
 
 Kami memilih pendekatan bertahap ini dengan mempertimbangkan keterkaitan langsung terhadap kewenangan DJPb, kesiapan sumber data, serta peluang menghasilkan manfaat yang dapat diuji dalam waktu relatif singkat.
 
-> **Penekanan saat berbicara:** D4a menguji **kelayakan data**, bukan menilai baik-buruknya kas daerah. D4b tidak boleh digunakan untuk mengklaim dana mengendap hanya dari saldo RKUD.
+
 
 ---
 
 ## Slide 4 — Solusi dan Arsitektur Kanal EWS MyIntress
 
-**Pesan inti:** Setiap sinyal harus memiliki pihak yang berwenang memeriksa, mengarahkan, dan menyelesaikan.
 
-**Naskah paparan**
 
-Bapak/Ibu Tim Penguji yang kami hormati,
+Bapak Ka Kanwil / Direktur yang kami hormati,
 
 Untuk memberikan gambaran bagaimana konsep tersebut dapat diterapkan, kami telah menyusun rancangan antarmuka atau *mockup* EWS yang memanfaatkan lingkungan MyIntress.
 
@@ -156,17 +143,15 @@ Sebagai ilustrasi, *mockup* menggunakan konteks Kanwil DJPb Provinsi Bali dan KP
 
 **Nilai utama rancangan ini bukan terletak pada tampilan aplikasinya, melainkan pada bagaimana EWS dapat membantu pejabat mengambil keputusan, mendelegasikan tindakan, dan memantau penyelesaiannya secara lebih tertib serta dapat ditelusuri.**
 
-> **Penekanan saat berbicara:** Empat peran pada *mockup* adalah rancangan pembagian tindakan; penerapan hak akses riil harus mengikuti persetujuan pemilik proses dan tata kelola data.
+
 
 ---
 
 ## Slide 5 — Roadmap Uji Coba dan Indikator Keberhasilan
 
-**Pesan inti:** Uji coba enam bulan merupakan sarana pembuktian manfaat, bukan persetujuan otomatis pengembangan nasional.
 
-**Naskah paparan**
 
-Bapak/Ibu Tim Penguji,
+Bapak Ka Kanwil / Direktur,
 
 Kami menyadari bahwa pengembangan sistem informasi memerlukan pertimbangan kesiapan data, proses bisnis, sumber daya, dan pengamanan informasi. Oleh karena itu, kami tidak merekomendasikan implementasi secara luas pada tahap awal.
 
@@ -200,17 +185,14 @@ Karena itu, setiap tahapan harus disertai pengendalian dan evaluasi. **Keputusan
 
 Apabila hasil *pilot* menunjukkan manfaat yang memadai, tahapan pengembangan lebih lanjut dapat dipertimbangkan sesuai prioritas dan ketersediaan sumber daya.
 
-> **Penekanan saat berbicara:** Target 80% merupakan **target usulan**, bukan capaian; *pilot* belum dilaksanakan. Bulan 7–12 adalah **opsi tindak lanjut bersyarat**, bukan komitmen otomatis.
 
 ---
 
 ## Slide 6 — Change Management: Strategi Adopsi Pengguna
 
-**Pesan inti:** Keberhasilan ditentukan oleh perubahan pola kerja dan kepemimpinan pelaksanaan, tidak hanya kesiapan teknologi.
 
-**Naskah paparan**
 
-Bapak/Ibu Tim Penguji yang kami hormati,
+Bapak Ka Kanwil / Direktur yang kami hormati,
 
 Kami memahami bahwa keberhasilan inovasi tidak hanya ditentukan oleh kesiapan teknologi, tetapi juga oleh kesiapan organisasi dan pegawai untuk mengubah cara kerja.
 
@@ -228,19 +210,15 @@ Tahap terakhir, **Reinforcement**, merupakan upaya menjaga keberlanjutan perubah
 
 Dalam implementasinya, peran Kepala KPPN dan pimpinan Kanwil menjadi sangat penting untuk memberikan arahan, menetapkan prioritas, mendelegasikan tugas, serta memastikan setiap peringatan ditindaklanjuti sesuai kewenangan.
 
-**Dengan demikian, perubahan yang ingin kami dorong bukan sekadar peningkatan penggunaan aplikasi, tetapi perubahan pola kerja dari pemantauan yang bersifat rutin menuju pengelolaan risiko yang lebih proaktif, terarah, dan berorientasi pada hasil.**
 
-> **Penekanan saat berbicara:** Manajemen perubahan bukan sekadar sosialisasi; pimpinan perlu menyediakan penanggung jawab, pembinaan, supervisi, dan umpan balik nyata.
 
 ---
 
 ## Slide 7 — Kesimpulan dan Rekomendasi Strategis
 
-**Pesan inti:** Persetujuan yang diharapkan adalah mandat uji coba dan tata kelola untuk membuktikan kelayakan, bukan izin langsung pengembangan skala nasional.
 
-**Naskah paparan**
 
-Bapak/Ibu Tim Penguji yang kami hormati,
+Bapak Ka Kanwil / Direktur yang kami hormati,
 
 Sebagai penutup substansi paparan, terdapat tiga kesimpulan utama yang dapat kami sampaikan.
 
@@ -262,19 +240,11 @@ Berdasarkan kesimpulan tersebut, kami menyampaikan tiga rekomendasi strategis.
 
 Keputusan pengembangan lebih lanjut hendaknya mempertimbangkan hasil evaluasi manfaat, keamanan informasi, kesiapan organisasi, dan sumber daya yang tersedia.
 
-Bapak/Ibu Tim Penguji,
+Bapak Ka Kanwil / Direktur Penguji,
 
 Melalui gagasan ini, kami ingin menempatkan inovasi bukan semata-mata sebagai pengembangan teknologi, tetapi sebagai **upaya memperkuat kualitas keputusan dan efektivitas tindak lanjut dalam pengelolaan risiko TKD**.
 
 Harapan kami, informasi yang tersedia tidak hanya menjadi bahan pemantauan dan pelaporan, tetapi semakin mampu mendukung tindakan yang tepat waktu, pendampingan yang lebih terarah, serta penguatan kontribusi DJPb dalam pengelolaan keuangan negara dan pembangunan daerah.
-
-> **Penekanan saat berbicara:** Ucapkan keputusan yang diminta secara jelas dan ringkas: persetujuan prinsip *pilot*, penetapan pengampu serta kewenangan data, dan evaluasi kelayakan sebelum pembangunan produksi.
-
----
-
-## Slide 8 — Penutup
-
-**Naskah paparan**
 
 Demikian paparan inovasi yang dapat kami sampaikan.
 
